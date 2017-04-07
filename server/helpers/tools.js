@@ -5,10 +5,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.series = exports.CODE_STYLES = exports.STYLES = exports.BAN_LEVELS = exports.REGISTERED_USER_LEVELS = exports.NODE_CAPTCHA_ID = exports.FILE_RATINGS = exports.DAY = exports.HOUR = exports.MINUTE = exports.SECOND = exports.translate = undefined;
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 var series = exports.series = function () {
-  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(arr, f, container) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(arr, f, container) {
     var isArray, isObject, p;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -68,7 +68,7 @@ var series = exports.series = function () {
   }));
 
   return function series(_x2, _x3, _x4) {
-    return _ref.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
@@ -123,7 +123,7 @@ var _config2 = _interopRequireDefault(_config);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 var translate = require('cute-localize')({
   locale: (0, _config2.default)('site.locale'),
@@ -238,7 +238,7 @@ function subnet(ip, s) {
   }
   try {
     var address = new _ipAddress.Address6(correctAddress(ip) + '/' + ns);
-    if (!+address.possibleSubnets(ns)) {
+    if (! +address.possibleSubnets(ns)) {
       return null;
     }
     return {
@@ -273,7 +273,7 @@ function preferIPv4(ip) {
 }
 
 function crypto(algorithm, data) {
-  var encoding = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'hex';
+  var encoding = arguments.length <= 2 || arguments[2] === undefined ? 'hex' : arguments[2];
 
   if (!data || typeof data !== 'string' && !_util2.default.isBuffer(data)) {
     return null;
@@ -304,10 +304,11 @@ function ipList(s) {
 }
 
 function option(source, acceptable, def) {
-  var _ref2 = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {},
-      strict = _ref2.strict,
-      invert = _ref2.invert,
-      test = _ref2.test;
+  var _ref = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
+
+  var strict = _ref.strict;
+  var invert = _ref.invert;
+  var test = _ref.test;
 
   if (typeof source === 'undefined') {
     return def;

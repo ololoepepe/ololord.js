@@ -5,8 +5,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 exports.default = function (req, res, next) {
-  var _ref = req.cookies || {},
-      hashpass = _ref.hashpass;
+  var _ref = req.cookies || {};
+
+  var hashpass = _ref.hashpass;
 
   if (Tools.mayBeHashpass(hashpass)) {
     req.hashpass = hashpass;

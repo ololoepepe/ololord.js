@@ -4,7 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -20,7 +20,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -32,7 +32,7 @@ var Hash = function (_CommonKey) {
   _inherits(Hash, _CommonKey);
 
   function Hash() {
-    var _ref;
+    var _Object$getPrototypeO;
 
     _classCallCheck(this, Hash);
 
@@ -40,13 +40,13 @@ var Hash = function (_CommonKey) {
       args[_key] = arguments[_key];
     }
 
-    return _possibleConstructorReturn(this, (_ref = Hash.__proto__ || Object.getPrototypeOf(Hash)).call.apply(_ref, [this].concat(args)));
+    return _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Hash)).call.apply(_Object$getPrototypeO, [this].concat(args)));
   }
 
   _createClass(Hash, [{
     key: 'getOne',
     value: function () {
-      var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee(id, subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(id, subkey) {
         var data;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -68,7 +68,7 @@ var Hash = function (_CommonKey) {
       }));
 
       function getOne(_x, _x2) {
-        return _ref2.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return getOne;
@@ -76,7 +76,7 @@ var Hash = function (_CommonKey) {
   }, {
     key: 'getSome',
     value: function () {
-      var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(ids, subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(ids, subkey) {
         var _client$hmget;
 
         var data;
@@ -108,7 +108,7 @@ var Hash = function (_CommonKey) {
       }));
 
       function getSome(_x3, _x4) {
-        return _ref3.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return getSome;
@@ -116,7 +116,7 @@ var Hash = function (_CommonKey) {
   }, {
     key: 'getAll',
     value: function () {
-      var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(subkey) {
         var data;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
@@ -138,7 +138,7 @@ var Hash = function (_CommonKey) {
       }));
 
       function getAll(_x5) {
-        return _ref4.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return getAll;
@@ -146,7 +146,7 @@ var Hash = function (_CommonKey) {
   }, {
     key: 'existsOne',
     value: function () {
-      var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(id, subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(id, subkey) {
         var exists;
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
@@ -168,7 +168,7 @@ var Hash = function (_CommonKey) {
       }));
 
       function existsOne(_x6, _x7) {
-        return _ref5.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return existsOne;
@@ -176,7 +176,7 @@ var Hash = function (_CommonKey) {
   }, {
     key: 'setOne',
     value: function () {
-      var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(id, data, subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(id, data, subkey) {
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
@@ -196,7 +196,7 @@ var Hash = function (_CommonKey) {
       }));
 
       function setOne(_x8, _x9, _x10) {
-        return _ref6.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return setOne;
@@ -204,7 +204,7 @@ var Hash = function (_CommonKey) {
   }, {
     key: 'setSome',
     value: function () {
-      var _ref7 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(items, subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(items, subkey) {
         var _client$hmset,
             _this2 = this;
 
@@ -252,7 +252,7 @@ var Hash = function (_CommonKey) {
       }));
 
       function setSome(_x11, _x12) {
-        return _ref7.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return setSome;
@@ -260,7 +260,7 @@ var Hash = function (_CommonKey) {
   }, {
     key: 'incrementBy',
     value: function () {
-      var _ref8 = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(id, n, subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(id, n, subkey) {
         return regeneratorRuntime.wrap(function _callee7$(_context7) {
           while (1) {
             switch (_context7.prev = _context7.next) {
@@ -280,7 +280,7 @@ var Hash = function (_CommonKey) {
       }));
 
       function incrementBy(_x13, _x14, _x15) {
-        return _ref8.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return incrementBy;
@@ -288,7 +288,7 @@ var Hash = function (_CommonKey) {
   }, {
     key: 'deleteOne',
     value: function () {
-      var _ref9 = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(id, subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(id, subkey) {
         return regeneratorRuntime.wrap(function _callee8$(_context8) {
           while (1) {
             switch (_context8.prev = _context8.next) {
@@ -308,7 +308,7 @@ var Hash = function (_CommonKey) {
       }));
 
       function deleteOne(_x16, _x17) {
-        return _ref9.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return deleteOne;
@@ -316,7 +316,7 @@ var Hash = function (_CommonKey) {
   }, {
     key: 'deleteSome',
     value: function () {
-      var _ref10 = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(ids, subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(ids, subkey) {
         var _client;
 
         return regeneratorRuntime.wrap(function _callee9$(_context9) {
@@ -350,7 +350,7 @@ var Hash = function (_CommonKey) {
       }));
 
       function deleteSome(_x18, _x19) {
-        return _ref10.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return deleteSome;
@@ -358,7 +358,7 @@ var Hash = function (_CommonKey) {
   }, {
     key: 'keys',
     value: function () {
-      var _ref11 = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(subkey) {
         return regeneratorRuntime.wrap(function _callee10$(_context10) {
           while (1) {
             switch (_context10.prev = _context10.next) {
@@ -378,7 +378,7 @@ var Hash = function (_CommonKey) {
       }));
 
       function keys(_x20) {
-        return _ref11.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return keys;
@@ -386,7 +386,7 @@ var Hash = function (_CommonKey) {
   }, {
     key: 'count',
     value: function () {
-      var _ref12 = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(subkey) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(subkey) {
         return regeneratorRuntime.wrap(function _callee11$(_context11) {
           while (1) {
             switch (_context11.prev = _context11.next) {
@@ -406,7 +406,7 @@ var Hash = function (_CommonKey) {
       }));
 
       function count(_x21) {
-        return _ref12.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return count;

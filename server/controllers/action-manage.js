@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var getRegisteredUserData = function () {
-  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(fields) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(fields) {
     var ips, levels;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -47,7 +47,7 @@ var getRegisteredUserData = function () {
   }));
 
   return function getRegisteredUserData(_x) {
-    return _ref.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
@@ -87,13 +87,13 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 var router = _express2.default.Router();
 
 router.post('/action/registerUser', function () {
-  var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(req, res, next) {
-    var _ref3, fields, password, _ref4, levels, ips, hashpass;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(req, res, next) {
+    var _ref, fields, password, _ref2, levels, ips, hashpass;
 
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -113,8 +113,8 @@ router.post('/action/registerUser', function () {
             return Files.parseForm(req);
 
           case 5:
-            _ref3 = _context2.sent;
-            fields = _ref3.fields;
+            _ref = _context2.sent;
+            fields = _ref.fields;
             password = fields.password;
 
             if (password) {
@@ -129,9 +129,9 @@ router.post('/action/registerUser', function () {
             return getRegisteredUserData(fields);
 
           case 12:
-            _ref4 = _context2.sent;
-            levels = _ref4.levels;
-            ips = _ref4.ips;
+            _ref2 = _context2.sent;
+            levels = _ref2.levels;
+            ips = _ref2.ips;
             hashpass = Tools.mayBeHashpass(password) ? password : Tools.toHashpass(password);
             _context2.next = 18;
             return UsersModel.registerUser(hashpass, levels, ips);
@@ -156,13 +156,13 @@ router.post('/action/registerUser', function () {
   }));
 
   return function (_x2, _x3, _x4) {
-    return _ref2.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }());
 
 router.post('/action/updateRegisteredUser', function () {
-  var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(req, res, next) {
-    var _ref6, fields, hashpass, _ref7, levels, ips;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(req, res, next) {
+    var _ref3, fields, hashpass, _ref4, levels, ips;
 
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
@@ -182,8 +182,8 @@ router.post('/action/updateRegisteredUser', function () {
             return Files.parseForm(req);
 
           case 5:
-            _ref6 = _context3.sent;
-            fields = _ref6.fields;
+            _ref3 = _context3.sent;
+            fields = _ref3.fields;
             hashpass = fields.hashpass;
 
             if (!(!hashpass || !Tools.mayBeHashpass(hashpass))) {
@@ -198,9 +198,9 @@ router.post('/action/updateRegisteredUser', function () {
             return getRegisteredUserData(fields);
 
           case 12:
-            _ref7 = _context3.sent;
-            levels = _ref7.levels;
-            ips = _ref7.ips;
+            _ref4 = _context3.sent;
+            levels = _ref4.levels;
+            ips = _ref4.ips;
             _context3.next = 17;
             return UsersModel.updateRegisteredUser(hashpass, levels, ips);
 
@@ -224,13 +224,13 @@ router.post('/action/updateRegisteredUser', function () {
   }));
 
   return function (_x5, _x6, _x7) {
-    return _ref5.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }());
 
 router.post('/action/unregisterUser', function () {
-  var _ref8 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(req, res, next) {
-    var _ref9, hashpass;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(req, res, next) {
+    var _ref5, hashpass;
 
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
@@ -250,8 +250,8 @@ router.post('/action/unregisterUser', function () {
             return Files.parseForm(req);
 
           case 5:
-            _ref9 = _context4.sent;
-            hashpass = _ref9.fields.hashpass;
+            _ref5 = _context4.sent;
+            hashpass = _ref5.fields.hashpass;
 
             if (!(!hashpass || !Tools.mayBeHashpass(hashpass))) {
               _context4.next = 9;
@@ -284,13 +284,13 @@ router.post('/action/unregisterUser', function () {
   }));
 
   return function (_x8, _x9, _x10) {
-    return _ref8.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }());
 
 router.post('/action/superuserAddFile', function () {
-  var _ref10 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(req, res, next) {
-    var _ref11, _ref11$fields, dir, fileName, isDir, files;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(req, res, next) {
+    var _ref6, _ref6$fields, dir, fileName, isDir, files;
 
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
@@ -310,12 +310,12 @@ router.post('/action/superuserAddFile', function () {
             return Files.parseForm(req);
 
           case 5:
-            _ref11 = _context5.sent;
-            _ref11$fields = _ref11.fields;
-            dir = _ref11$fields.dir;
-            fileName = _ref11$fields.fileName;
-            isDir = _ref11$fields.isDir;
-            files = _ref11.files;
+            _ref6 = _context5.sent;
+            _ref6$fields = _ref6.fields;
+            dir = _ref6$fields.dir;
+            fileName = _ref6$fields.fileName;
+            isDir = _ref6$fields.isDir;
+            files = _ref6.files;
 
             if (!(!dir || typeof dir !== 'string')) {
               _context5.next = 13;
@@ -359,13 +359,13 @@ router.post('/action/superuserAddFile', function () {
   }));
 
   return function (_x11, _x12, _x13) {
-    return _ref10.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }());
 
 router.post('/action/superuserEditFile', function () {
-  var _ref12 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(req, res, next) {
-    var _ref13, _ref13$fields, fileName, content;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(req, res, next) {
+    var _ref7, _ref7$fields, fileName, content;
 
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
@@ -385,10 +385,10 @@ router.post('/action/superuserEditFile', function () {
             return Files.parseForm(req);
 
           case 5:
-            _ref13 = _context6.sent;
-            _ref13$fields = _ref13.fields;
-            fileName = _ref13$fields.fileName;
-            content = _ref13$fields.content;
+            _ref7 = _context6.sent;
+            _ref7$fields = _ref7.fields;
+            fileName = _ref7$fields.fileName;
+            content = _ref7$fields.content;
 
             if (!(!fileName || typeof fileName !== 'string')) {
               _context6.next = 11;
@@ -421,13 +421,13 @@ router.post('/action/superuserEditFile', function () {
   }));
 
   return function (_x14, _x15, _x16) {
-    return _ref12.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }());
 
 router.post('/action/superuserRenameFile', function () {
-  var _ref14 = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(req, res, next) {
-    var _ref15, _ref15$fields, oldFileName, fileName;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(req, res, next) {
+    var _ref8, _ref8$fields, oldFileName, fileName;
 
     return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
@@ -447,10 +447,10 @@ router.post('/action/superuserRenameFile', function () {
             return Files.parseForm(req);
 
           case 5:
-            _ref15 = _context7.sent;
-            _ref15$fields = _ref15.fields;
-            oldFileName = _ref15$fields.oldFileName;
-            fileName = _ref15$fields.fileName;
+            _ref8 = _context7.sent;
+            _ref8$fields = _ref8.fields;
+            oldFileName = _ref8$fields.oldFileName;
+            fileName = _ref8$fields.fileName;
 
             if (!(!oldFileName || typeof oldFileName !== 'string' || !fileName || typeof fileName !== 'string')) {
               _context7.next = 11;
@@ -483,13 +483,13 @@ router.post('/action/superuserRenameFile', function () {
   }));
 
   return function (_x17, _x18, _x19) {
-    return _ref14.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }());
 
 router.post('/action/superuserDeleteFile', function () {
-  var _ref16 = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(req, res, next) {
-    var _ref17, fileName;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(req, res, next) {
+    var _ref9, fileName;
 
     return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
@@ -509,8 +509,8 @@ router.post('/action/superuserDeleteFile', function () {
             return Files.parseForm(req);
 
           case 5:
-            _ref17 = _context8.sent;
-            fileName = _ref17.fields.fileName;
+            _ref9 = _context8.sent;
+            fileName = _ref9.fields.fileName;
 
             if (!(!fileName || typeof fileName !== 'string')) {
               _context8.next = 9;
@@ -543,13 +543,13 @@ router.post('/action/superuserDeleteFile', function () {
   }));
 
   return function (_x20, _x21, _x22) {
-    return _ref16.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }());
 
 router.post('/action/superuserRerender', function () {
-  var _ref18 = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(req, res, next) {
-    var _ref19, targets;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(req, res, next) {
+    var _ref10, targets;
 
     return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
@@ -569,8 +569,8 @@ router.post('/action/superuserRerender', function () {
             return Files.parseForm(req);
 
           case 5:
-            _ref19 = _context9.sent;
-            targets = _ref19.fields.targets;
+            _ref10 = _context9.sent;
+            targets = _ref10.fields.targets;
 
             if (!(typeof targets !== 'string')) {
               _context9.next = 9;
@@ -616,13 +616,13 @@ router.post('/action/superuserRerender', function () {
   }));
 
   return function (_x23, _x24, _x25) {
-    return _ref18.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }());
 
 router.post('/action/superuserMarkupPosts', function () {
-  var _ref20 = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(req, res, next) {
-    var _ref21, targets;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(req, res, next) {
+    var _ref11, targets;
 
     return regeneratorRuntime.wrap(function _callee10$(_context10) {
       while (1) {
@@ -642,8 +642,8 @@ router.post('/action/superuserMarkupPosts', function () {
             return Files.parseForm(req);
 
           case 5:
-            _ref21 = _context10.sent;
-            targets = _ref21.fields.targets;
+            _ref11 = _context10.sent;
+            targets = _ref11.fields.targets;
 
             if (!(typeof targets !== 'string')) {
               _context10.next = 9;
@@ -677,13 +677,13 @@ router.post('/action/superuserMarkupPosts', function () {
   }));
 
   return function (_x26, _x27, _x28) {
-    return _ref20.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }());
 
 router.post('/action/superuserReload', function () {
-  var _ref22 = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(req, res, next) {
-    var _ref23, _ref23$fields, boards, templates;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(req, res, next) {
+    var _ref12, _ref12$fields, boards, templates;
 
     return regeneratorRuntime.wrap(function _callee11$(_context11) {
       while (1) {
@@ -703,10 +703,10 @@ router.post('/action/superuserReload', function () {
             return Files.parseForm(req);
 
           case 5:
-            _ref23 = _context11.sent;
-            _ref23$fields = _ref23.fields;
-            boards = _ref23$fields.boards;
-            templates = _ref23$fields.templates;
+            _ref12 = _context11.sent;
+            _ref12$fields = _ref12.fields;
+            boards = _ref12$fields.boards;
+            templates = _ref12$fields.templates;
 
             if (!('true' === boards)) {
               _context11.next = 12;
@@ -745,7 +745,7 @@ router.post('/action/superuserReload', function () {
   }));
 
   return function (_x29, _x30, _x31) {
-    return _ref22.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }());
 

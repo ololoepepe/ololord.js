@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.resizeImage = exports.getImageSize = exports.getMimeType = exports.generateRandomImage = exports.deleteFile = exports.renameFile = exports.editFile = exports.createFile = exports.writeFile = exports.diskUsage = exports.processFiles = exports.renderPostFileInfos = exports.getFiles = undefined;
 
 var downloadFile = function () {
-  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(url, formFieldName, fields) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(url, formFieldName, fields) {
     var path, proxy, options, result, response, data, file, mimeType;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -101,12 +101,12 @@ var downloadFile = function () {
   }));
 
   return function downloadFile(_x, _x2, _x3) {
-    return _ref.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var getFiles = exports.getFiles = function () {
-  var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(fields, files) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(fields, files) {
     var downloadedFiles, hashes, fileInfos, existingFiles;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
@@ -122,7 +122,7 @@ var getFiles = exports.getFiles = function () {
               }
               return true;
             }), function () {
-              var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(file) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(file) {
                 var mimeType;
                 return regeneratorRuntime.wrap(function _callee2$(_context2) {
                   while (1) {
@@ -147,7 +147,7 @@ var getFiles = exports.getFiles = function () {
               }));
 
               return function (_x6) {
-                return _ref3.apply(this, arguments);
+                return ref.apply(this, arguments);
               };
             }(), true);
 
@@ -158,7 +158,7 @@ var getFiles = exports.getFiles = function () {
               return (/^file_url_\S+$/.test(key)
               );
             }), function () {
-              var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(url, formFieldName) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(url, formFieldName) {
                 return regeneratorRuntime.wrap(function _callee3$(_context3) {
                   while (1) {
                     switch (_context3.prev = _context3.next) {
@@ -178,7 +178,7 @@ var getFiles = exports.getFiles = function () {
               }));
 
               return function (_x7, _x8) {
-                return _ref4.apply(this, arguments);
+                return ref.apply(this, arguments);
               };
             }(), true);
 
@@ -218,14 +218,14 @@ var getFiles = exports.getFiles = function () {
   }));
 
   return function getFiles(_x4, _x5) {
-    return _ref2.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var waitForFile = function () {
-  var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(filePath, options) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(filePath, options) {
     var f = function () {
-      var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
         var exists;
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
@@ -269,7 +269,7 @@ var waitForFile = function () {
       }));
 
       return function f() {
-        return _ref6.apply(this, arguments);
+        return ref.apply(this, arguments);
       };
     }();
 
@@ -293,12 +293,12 @@ var waitForFile = function () {
   }));
 
   return function waitForFile(_x9, _x10) {
-    return _ref5.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var generateFileName = function () {
-  var _ref7 = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(file, plugin) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(file, plugin) {
     var baseName, suffix, canonicalSuffix, thumbSuffix;
     return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
@@ -338,12 +338,12 @@ var generateFileName = function () {
   }));
 
   return function generateFileName(_x11, _x12) {
-    return _ref7.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var createFileThumb = function () {
-  var _ref8 = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(file, plugin) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(file, plugin) {
     var thumbPath, result;
     return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
@@ -384,12 +384,12 @@ var createFileThumb = function () {
   }));
 
   return function createFileThumb(_x13, _x14) {
-    return _ref8.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var renderPostFileInfos = exports.renderPostFileInfos = function () {
-  var _ref9 = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(post) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(post) {
     return regeneratorRuntime.wrap(function _callee10$(_context10) {
       while (1) {
         switch (_context10.prev = _context10.next) {
@@ -404,7 +404,7 @@ var renderPostFileInfos = exports.renderPostFileInfos = function () {
           case 2:
             _context10.next = 4;
             return Tools.series(post.fileInfos || [], function () {
-              var _ref10 = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(fileInfo) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(fileInfo) {
                 var plugin, err;
                 return regeneratorRuntime.wrap(function _callee9$(_context9) {
                   while (1) {
@@ -453,7 +453,7 @@ var renderPostFileInfos = exports.renderPostFileInfos = function () {
               }));
 
               return function (_x16) {
-                return _ref10.apply(this, arguments);
+                return ref.apply(this, arguments);
               };
             }());
 
@@ -466,12 +466,12 @@ var renderPostFileInfos = exports.renderPostFileInfos = function () {
   }));
 
   return function renderPostFileInfos(_x15) {
-    return _ref9.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var processFile = function () {
-  var _ref11 = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(boardName, file, transaction) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(boardName, file, transaction) {
     var plugin, fn, targetFilePath, targetThumbPath, sourceFilePath, sourceThumbPath, fileInfo, _sourceFilePath, data;
 
     return regeneratorRuntime.wrap(function _callee11$(_context11) {
@@ -596,12 +596,12 @@ var processFile = function () {
   }));
 
   return function processFile(_x18, _x19, _x20) {
-    return _ref11.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var processFiles = exports.processFiles = function () {
-  var _ref12 = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(boardName, files, transaction) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(boardName, files, transaction) {
     var path;
     return regeneratorRuntime.wrap(function _callee12$(_context12) {
       while (1) {
@@ -641,12 +641,12 @@ var processFiles = exports.processFiles = function () {
   }));
 
   return function processFiles(_x21, _x22, _x23) {
-    return _ref12.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var diskUsage = exports.diskUsage = function () {
-  var _ref13 = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(path) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(path) {
     return regeneratorRuntime.wrap(function _callee13$(_context13) {
       while (1) {
         switch (_context13.prev = _context13.next) {
@@ -673,12 +673,12 @@ var diskUsage = exports.diskUsage = function () {
   }));
 
   return function diskUsage(_x24) {
-    return _ref13.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var writeFile = exports.writeFile = function () {
-  var _ref14 = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(filePath, data) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(filePath, data) {
     var tmpFilePath, path, exists;
     return regeneratorRuntime.wrap(function _callee14$(_context14) {
       while (1) {
@@ -717,16 +717,16 @@ var writeFile = exports.writeFile = function () {
   }));
 
   return function writeFile(_x25, _x26) {
-    return _ref14.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var createFile = exports.createFile = function () {
-  var _ref15 = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(dir, fileName) {
-    var _ref16 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
-        file = _ref16.file,
-        isDir = _ref16.isDir;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(dir, fileName) {
+    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
+    var file = _ref.file;
+    var isDir = _ref.isDir;
     var path;
     return regeneratorRuntime.wrap(function _callee15$(_context15) {
       while (1) {
@@ -770,13 +770,13 @@ var createFile = exports.createFile = function () {
     }, _callee15, this);
   }));
 
-  return function createFile(_x27, _x28) {
-    return _ref15.apply(this, arguments);
+  return function createFile(_x27, _x28, _x29) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var editFile = exports.editFile = function () {
-  var _ref17 = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(fileName, content) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(fileName, content) {
     return regeneratorRuntime.wrap(function _callee16$(_context16) {
       while (1) {
         switch (_context16.prev = _context16.next) {
@@ -792,13 +792,13 @@ var editFile = exports.editFile = function () {
     }, _callee16, this);
   }));
 
-  return function editFile(_x30, _x31) {
-    return _ref17.apply(this, arguments);
+  return function editFile(_x31, _x32) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var renameFile = exports.renameFile = function () {
-  var _ref18 = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(oldFileName, fileName) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(oldFileName, fileName) {
     var oldPath;
     return regeneratorRuntime.wrap(function _callee17$(_context17) {
       while (1) {
@@ -816,13 +816,13 @@ var renameFile = exports.renameFile = function () {
     }, _callee17, this);
   }));
 
-  return function renameFile(_x32, _x33) {
-    return _ref18.apply(this, arguments);
+  return function renameFile(_x33, _x34) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var deleteFile = exports.deleteFile = function () {
-  var _ref19 = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(fileName) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(fileName) {
     return regeneratorRuntime.wrap(function _callee18$(_context18) {
       while (1) {
         switch (_context18.prev = _context18.next) {
@@ -838,13 +838,13 @@ var deleteFile = exports.deleteFile = function () {
     }, _callee18, this);
   }));
 
-  return function deleteFile(_x34) {
-    return _ref19.apply(this, arguments);
+  return function deleteFile(_x35) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var generateRandomImage = exports.generateRandomImage = function () {
-  var _ref20 = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(hash, mimeType, thumbPath) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(hash, mimeType, thumbPath) {
     var canvas, ctx, data, img;
     return regeneratorRuntime.wrap(function _callee19$(_context19) {
       while (1) {
@@ -879,13 +879,13 @@ var generateRandomImage = exports.generateRandomImage = function () {
     }, _callee19, this);
   }));
 
-  return function generateRandomImage(_x35, _x36, _x37) {
-    return _ref20.apply(this, arguments);
+  return function generateRandomImage(_x36, _x37, _x38) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var getMimeType = exports.getMimeType = function () {
-  var _ref21 = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(fileName) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(fileName) {
     return regeneratorRuntime.wrap(function _callee20$(_context20) {
       while (1) {
         switch (_context20.prev = _context20.next) {
@@ -931,13 +931,13 @@ var getMimeType = exports.getMimeType = function () {
     }, _callee20, this, [[2, 8]]);
   }));
 
-  return function getMimeType(_x38) {
-    return _ref21.apply(this, arguments);
+  return function getMimeType(_x39) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var getImageSize = exports.getImageSize = function () {
-  var _ref22 = _asyncToGenerator(regeneratorRuntime.mark(function _callee21(fileName) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee21(fileName) {
     return regeneratorRuntime.wrap(function _callee21$(_context21) {
       while (1) {
         switch (_context21.prev = _context21.next) {
@@ -959,13 +959,13 @@ var getImageSize = exports.getImageSize = function () {
     }, _callee21, this);
   }));
 
-  return function getImageSize(_x39) {
-    return _ref22.apply(this, arguments);
+  return function getImageSize(_x40) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var resizeImage = exports.resizeImage = function () {
-  var _ref23 = _asyncToGenerator(regeneratorRuntime.mark(function _callee22(fileName, width, height, options) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee22(fileName, width, height, options) {
     return regeneratorRuntime.wrap(function _callee22$(_context22) {
       while (1) {
         switch (_context22.prev = _context22.next) {
@@ -987,8 +987,8 @@ var resizeImage = exports.resizeImage = function () {
     }, _callee22, this);
   }));
 
-  return function resizeImage(_x40, _x41, _x42, _x43) {
-    return _ref23.apply(this, arguments);
+  return function resizeImage(_x41, _x42, _x43, _x44) {
+    return ref.apply(this, arguments);
   };
 }();
 
@@ -1087,7 +1087,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 var mkpath = (0, _promisifyNode2.default)('mkpath');
 
@@ -1114,9 +1114,9 @@ function selectThumbnailingPlugin(mimeType) {
 }
 
 function parseForm() {
-  var req = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  var formFields = req.formFields,
-      formFiles = req.formFiles;
+  var req = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+  var formFields = req.formFields;
+  var formFiles = req.formFiles;
 
   if (formFields) {
     return {

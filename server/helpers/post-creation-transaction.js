@@ -26,7 +26,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -64,7 +64,7 @@ var PostCreationTransaction = function () {
   }, {
     key: 'rollback',
     value: function () {
-      var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -118,7 +118,7 @@ var PostCreationTransaction = function () {
       }));
 
       function rollback() {
-        return _ref.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return rollback;
@@ -126,14 +126,14 @@ var PostCreationTransaction = function () {
   }, {
     key: '_rollbackFiles',
     value: function () {
-      var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
                 _context3.next = 2;
                 return Tools.series(this.files, function () {
-                  var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(path) {
+                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(path) {
                     var exists;
                     return regeneratorRuntime.wrap(function _callee2$(_context2) {
                       while (1) {
@@ -173,7 +173,7 @@ var PostCreationTransaction = function () {
                   }));
 
                   return function (_x) {
-                    return _ref3.apply(this, arguments);
+                    return ref.apply(this, arguments);
                   };
                 }());
 
@@ -186,7 +186,7 @@ var PostCreationTransaction = function () {
       }));
 
       function _rollbackFiles() {
-        return _ref2.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return _rollbackFiles;
@@ -194,7 +194,7 @@ var PostCreationTransaction = function () {
   }, {
     key: '_rollbackThread',
     value: function () {
-      var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
         var Thread;
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
@@ -231,7 +231,7 @@ var PostCreationTransaction = function () {
       }));
 
       function _rollbackThread() {
-        return _ref4.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return _rollbackThread;
@@ -239,7 +239,7 @@ var PostCreationTransaction = function () {
   }, {
     key: '_rollbackPosts',
     value: function () {
-      var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
         var Post;
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
@@ -276,7 +276,7 @@ var PostCreationTransaction = function () {
       }));
 
       function _rollbackPosts() {
-        return _ref5.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return _rollbackPosts;

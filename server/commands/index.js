@@ -23,7 +23,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 var vorpal = require('vorpal')();
 
@@ -31,7 +31,7 @@ function setupMethods(command) {
   var prompt = command.prompt;
 
   command.prompt = function () {
-    var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(options) {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(options) {
       return regeneratorRuntime.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
@@ -58,7 +58,7 @@ function setupMethods(command) {
     }));
 
     return function (_x) {
-      return _ref.apply(this, arguments);
+      return ref.apply(this, arguments);
     };
   }();
 
@@ -123,13 +123,14 @@ function setupMethods(command) {
 }
 
 vorpal.installHandler = function (command, handler) {
-  var _ref3 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
-      description = _ref3.description,
-      alias = _ref3.alias,
-      options = _ref3.options;
+  var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+  var description = _ref.description;
+  var alias = _ref.alias;
+  var options = _ref.options;
 
   command = vorpal.command(command, description || undefined).action(function () {
-    var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(args, callback) {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(args, callback) {
       var result;
       return regeneratorRuntime.wrap(function _callee3$(_context3) {
         while (1) {
@@ -167,7 +168,7 @@ vorpal.installHandler = function (command, handler) {
     }));
 
     return function (_x3, _x4) {
-      return _ref4.apply(this, arguments);
+      return ref.apply(this, arguments);
     };
   }()).cancel(function () {
     console.log(Tools.translate('Cancelled'));

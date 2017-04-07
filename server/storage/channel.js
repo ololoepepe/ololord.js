@@ -22,15 +22,16 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Channel = function () {
   function Channel(client, name) {
-    var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
-        parse = _ref.parse,
-        stringify = _ref.stringify;
+    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    var parse = _ref.parse;
+    var stringify = _ref.stringify;
 
     _classCallCheck(this, Channel);
 
@@ -45,7 +46,7 @@ var Channel = function () {
   _createClass(Channel, [{
     key: 'publish',
     value: function () {
-      var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee(data) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(data) {
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -65,7 +66,7 @@ var Channel = function () {
       }));
 
       function publish(_x2) {
-        return _ref2.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return publish;
@@ -73,7 +74,7 @@ var Channel = function () {
   }, {
     key: 'subscribe',
     value: function () {
-      var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(handler) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(handler) {
         var shouldSubscribe;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
@@ -111,7 +112,7 @@ var Channel = function () {
       }));
 
       function subscribe(_x3) {
-        return _ref3.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return subscribe;
@@ -119,7 +120,7 @@ var Channel = function () {
   }, {
     key: 'unsubscribe',
     value: function () {
-      var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(handler) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(handler) {
         var index;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
@@ -173,7 +174,7 @@ var Channel = function () {
       }));
 
       function unsubscribe(_x4) {
-        return _ref4.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return unsubscribe;
@@ -181,7 +182,7 @@ var Channel = function () {
   }, {
     key: '_handleMessage',
     value: function () {
-      var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(channel, message) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(channel, message) {
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
@@ -198,7 +199,7 @@ var Channel = function () {
                 _context5.prev = 3;
                 _context5.next = 6;
                 return Tools.series(this.handlers, function () {
-                  var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(handler) {
+                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(handler) {
                     return regeneratorRuntime.wrap(function _callee4$(_context4) {
                       while (1) {
                         switch (_context4.prev = _context4.next) {
@@ -215,7 +216,7 @@ var Channel = function () {
                   }));
 
                   return function (_x7) {
-                    return _ref6.apply(this, arguments);
+                    return ref.apply(this, arguments);
                   };
                 }());
 
@@ -238,7 +239,7 @@ var Channel = function () {
       }));
 
       function _handleMessage(_x5, _x6) {
-        return _ref5.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return _handleMessage;

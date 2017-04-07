@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.renderRSS = exports.renderArchive = exports.render = exports.enqueueTask = exports.send = undefined;
 
 var handleMessage = function () {
-  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(message, workerID) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(message, workerID) {
     var task, handler, proc, data;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -79,12 +79,12 @@ var handleMessage = function () {
   }));
 
   return function handleMessage(_x, _x2) {
-    return _ref.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var send = exports.send = function () {
-  var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(type, data, nowait, workerID) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(type, data, nowait, workerID) {
     var worker, promises;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -146,12 +146,12 @@ var send = exports.send = function () {
   }));
 
   return function send(_x3, _x4, _x5, _x6) {
-    return _ref2.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var enqueueTask = exports.enqueueTask = function () {
-  var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(task, data, timeout) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(task, data, timeout) {
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -184,12 +184,12 @@ var enqueueTask = exports.enqueueTask = function () {
   }));
 
   return function enqueueTask(_x7, _x8, _x9) {
-    return _ref3.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var render = exports.render = function () {
-  var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(boardName, threadNumber, postNumber, action, timeout) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(boardName, threadNumber, postNumber, action, timeout) {
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
@@ -225,12 +225,12 @@ var render = exports.render = function () {
   }));
 
   return function render(_x10, _x11, _x12, _x13, _x14) {
-    return _ref4.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var renderArchive = exports.renderArchive = function () {
-  var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(boardName, timeout) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(boardName, timeout) {
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
@@ -261,12 +261,12 @@ var renderArchive = exports.renderArchive = function () {
   }));
 
   return function renderArchive(_x15, _x16) {
-    return _ref5.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var renderRSS = exports.renderRSS = function () {
-  var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(timeout) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(timeout) {
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
@@ -294,7 +294,7 @@ var renderRSS = exports.renderRSS = function () {
   }));
 
   return function renderRSS(_x17) {
-    return _ref6.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
@@ -328,7 +328,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 var DEFAULT_TASK_TIMEOUT = 30 * Tools.SECOND;
 

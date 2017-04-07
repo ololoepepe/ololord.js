@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -27,7 +27,7 @@ var SQLiteDatabaseWrapper = function () {
   _createClass(SQLiteDatabaseWrapper, [{
     key: '_awaitClient',
     value: function () {
-      var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -83,7 +83,7 @@ var SQLiteDatabaseWrapper = function () {
       }));
 
       function _awaitClient() {
-        return _ref.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return _awaitClient;
@@ -91,7 +91,7 @@ var SQLiteDatabaseWrapper = function () {
   }, {
     key: '_runRaw',
     value: function () {
-      var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(statement) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(statement) {
         var _this = this;
 
         for (var _len = arguments.length, params = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
@@ -120,8 +120,8 @@ var SQLiteDatabaseWrapper = function () {
         }, _callee2, this);
       }));
 
-      function _runRaw(_x) {
-        return _ref2.apply(this, arguments);
+      function _runRaw(_x, _x2) {
+        return ref.apply(this, arguments);
       }
 
       return _runRaw;
@@ -129,7 +129,7 @@ var SQLiteDatabaseWrapper = function () {
   }, {
     key: 'run',
     value: function () {
-      var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
         var _args3 = arguments;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
@@ -153,8 +153,8 @@ var SQLiteDatabaseWrapper = function () {
         }, _callee3, this);
       }));
 
-      function run() {
-        return _ref3.apply(this, arguments);
+      function run(_x3) {
+        return ref.apply(this, arguments);
       }
 
       return run;
@@ -162,7 +162,7 @@ var SQLiteDatabaseWrapper = function () {
   }, {
     key: 'get',
     value: function () {
-      var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(statement) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(statement) {
         var _this2 = this;
 
         for (var _len2 = arguments.length, params = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
@@ -195,8 +195,8 @@ var SQLiteDatabaseWrapper = function () {
         }, _callee4, this);
       }));
 
-      function get(_x2) {
-        return _ref4.apply(this, arguments);
+      function get(_x4, _x5) {
+        return ref.apply(this, arguments);
       }
 
       return get;
@@ -204,7 +204,7 @@ var SQLiteDatabaseWrapper = function () {
   }, {
     key: 'all',
     value: function () {
-      var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(statement) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(statement) {
         var _this3 = this;
 
         for (var _len3 = arguments.length, params = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
@@ -237,8 +237,8 @@ var SQLiteDatabaseWrapper = function () {
         }, _callee5, this);
       }));
 
-      function all(_x3) {
-        return _ref5.apply(this, arguments);
+      function all(_x6, _x7) {
+        return ref.apply(this, arguments);
       }
 
       return all;
@@ -246,7 +246,7 @@ var SQLiteDatabaseWrapper = function () {
   }, {
     key: '_checkTransactionQueue',
     value: function () {
-      var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6() {
         var _this4 = this;
 
         var next, state;
@@ -336,7 +336,7 @@ var SQLiteDatabaseWrapper = function () {
       }));
 
       function _checkTransactionQueue() {
-        return _ref6.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return _checkTransactionQueue;
@@ -344,7 +344,7 @@ var SQLiteDatabaseWrapper = function () {
   }, {
     key: '_transaction',
     value: function () {
-      var _ref7 = _asyncToGenerator(regeneratorRuntime.mark(function _callee7() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7() {
         var _this5 = this;
 
         var promise;
@@ -373,7 +373,7 @@ var SQLiteDatabaseWrapper = function () {
       }));
 
       function _transaction() {
-        return _ref7.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return _transaction;
@@ -381,7 +381,7 @@ var SQLiteDatabaseWrapper = function () {
   }, {
     key: 'transaction',
     value: function () {
-      var _ref8 = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(f) {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(f) {
         var t, result, committed;
         return regeneratorRuntime.wrap(function _callee8$(_context8) {
           while (1) {
@@ -458,8 +458,8 @@ var SQLiteDatabaseWrapper = function () {
         }, _callee8, this, [[1, 19], [22, 27]]);
       }));
 
-      function transaction(_x4) {
-        return _ref8.apply(this, arguments);
+      function transaction(_x8) {
+        return ref.apply(this, arguments);
       }
 
       return transaction;

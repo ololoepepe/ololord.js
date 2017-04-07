@@ -4,7 +4,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 var _underscore = require('underscore');
 
@@ -32,7 +32,7 @@ var _fsWatcher2 = _interopRequireDefault(_fsWatcher);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 var DEFAULT_CONFIG_FILE_NAME_1 = __dirname + '/../../config.json';
 var DEFAULT_CONFIG_FILE_NAME_2 = __dirname + '/../../config.js';
@@ -96,11 +96,11 @@ var config = {};
 var hooks = {};
 
 if (configFileName && _fs2.default.existsSync(configFileName)) {
-  console.log('[' + process.pid + '] Using config file: "' + configFileName + '"\u2026');
+  console.log('[' + process.pid + '] Using config file: "' + configFileName + '"…');
   config = _fsWatcher2.default.createWatchedResource(configFileName, function (path) {
     return require(path);
   }, function () {
-    var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(path) {
+    var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(path) {
       var oldConfig, id, keys;
       return regeneratorRuntime.wrap(function _callee$(_context) {
         while (1) {
@@ -143,11 +143,11 @@ if (configFileName && _fs2.default.existsSync(configFileName)) {
     }));
 
     return function (_x) {
-      return _ref.apply(this, arguments);
+      return ref.apply(this, arguments);
     };
   }()) || {};
 } else {
-  console.log('[' + process.pid + '] Using default (empty) config\u2026');
+  console.log('[' + process.pid + '] Using default (empty) config…');
 }
 
 function c(key, def) {

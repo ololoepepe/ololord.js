@@ -26,7 +26,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -47,7 +47,7 @@ var GoogleRecaptcha = function (_Captcha) {
   function GoogleRecaptcha() {
     _classCallCheck(this, GoogleRecaptcha);
 
-    var _this = _possibleConstructorReturn(this, (GoogleRecaptcha.__proto__ || Object.getPrototypeOf(GoogleRecaptcha)).call(this, 'google-recaptcha', Tools.translate.noop('Google reCAPTCHA')));
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(GoogleRecaptcha).call(this, 'google-recaptcha', Tools.translate.noop('Google reCAPTCHA')));
 
     _this.defineSetting('timeout', 15 * Tools.SECOND);
     return _this;
@@ -56,8 +56,8 @@ var GoogleRecaptcha = function (_Captcha) {
   _createClass(GoogleRecaptcha, [{
     key: 'checkCaptcha',
     value: function () {
-      var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(_ref2, fields) {
-        var ip = _ref2.ip;
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(_ref, fields) {
+        var ip = _ref.ip;
         var captcha, query, reply, data, result;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -119,7 +119,7 @@ var GoogleRecaptcha = function (_Captcha) {
       }));
 
       function checkCaptcha(_x, _x2) {
-        return _ref.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return checkCaptcha;

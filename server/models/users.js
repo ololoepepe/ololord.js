@@ -5,10 +5,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.initializeUserBansMonitoring = exports.banUser = exports.updatePostBanInfo = exports.checkUserPermissions = exports.checkUserBan = exports.setSynchronizationData = exports.getSynchronizationData = exports.removeSuperuser = exports.addSuperuser = exports.unregisterUser = exports.updateRegisteredUser = exports.registerUser = exports.getRegisteredUsers = exports.getRegisteredUser = exports.getRegisteredUserLevelsByIp = exports.getRegisteredUserLevels = exports.getBannedUsers = exports.getBannedUser = exports.getUserIP = exports.useCaptcha = exports.incrementUserCaptchaQuotaBy = exports.setUserCaptchaQuota = exports.getUserCaptchaQuota = undefined;
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 var getUserCaptchaQuota = exports.getUserCaptchaQuota = function () {
-  var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, userID) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, userID) {
     var quota;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
@@ -57,12 +57,12 @@ var getUserCaptchaQuota = exports.getUserCaptchaQuota = function () {
   }));
 
   return function getUserCaptchaQuota(_x3, _x4) {
-    return _ref3.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var setUserCaptchaQuota = exports.setUserCaptchaQuota = function () {
-  var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(boardName, userID, quota) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(boardName, userID, quota) {
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
@@ -93,12 +93,12 @@ var setUserCaptchaQuota = exports.setUserCaptchaQuota = function () {
   }));
 
   return function setUserCaptchaQuota(_x5, _x6, _x7) {
-    return _ref4.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var incrementUserCaptchaQuotaBy = exports.incrementUserCaptchaQuotaBy = function () {
-  var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(userID, quota, boardName) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(userID, quota, boardName) {
     var key;
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
@@ -140,12 +140,12 @@ var incrementUserCaptchaQuotaBy = exports.incrementUserCaptchaQuotaBy = function
   }));
 
   return function incrementUserCaptchaQuotaBy(_x8, _x9, _x10) {
-    return _ref5.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var useCaptcha = exports.useCaptcha = function () {
-  var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(boardName, userID) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(boardName, userID) {
     var board, key, quota;
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
@@ -213,12 +213,12 @@ var useCaptcha = exports.useCaptcha = function () {
   }));
 
   return function useCaptcha(_x11, _x12) {
-    return _ref6.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var getUserIP = exports.getUserIP = function () {
-  var _ref7 = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(boardName, postNumber) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(boardName, postNumber) {
     var Post, post;
     return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
@@ -257,12 +257,12 @@ var getUserIP = exports.getUserIP = function () {
   }));
 
   return function getUserIP(_x13, _x14) {
-    return _ref7.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var getBannedUser = exports.getBannedUser = function () {
-  var _ref8 = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(ip, boardNames) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(ip, boardNames) {
     var BannedUser, binaryAddress, bannedUser;
     return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
@@ -310,12 +310,12 @@ var getBannedUser = exports.getBannedUser = function () {
   }));
 
   return function getBannedUser(_x15, _x16) {
-    return _ref8.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var getBannedUsers = exports.getBannedUsers = function () {
-  var _ref9 = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(boardNames) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(boardNames) {
     var BannedUser, bannedUsers;
     return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
@@ -347,15 +347,15 @@ var getBannedUsers = exports.getBannedUsers = function () {
   }));
 
   return function getBannedUsers(_x17) {
-    return _ref9.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var getRegisteredUserInternal = function () {
-  var _ref10 = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(query) {
-    var _ref11 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-        full = _ref11.full;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(query) {
+    var _ref = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
+    var full = _ref.full;
     var User, projection, user;
     return regeneratorRuntime.wrap(function _callee10$(_context10) {
       while (1) {
@@ -398,13 +398,13 @@ var getRegisteredUserInternal = function () {
     }, _callee10, this);
   }));
 
-  return function getRegisteredUserInternal(_x18) {
-    return _ref10.apply(this, arguments);
+  return function getRegisteredUserInternal(_x18, _x19) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var getRegisteredUserLevels = exports.getRegisteredUserLevels = function () {
-  var _ref12 = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(hashpass) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(hashpass) {
     var user;
     return regeneratorRuntime.wrap(function _callee11$(_context11) {
       while (1) {
@@ -425,13 +425,13 @@ var getRegisteredUserLevels = exports.getRegisteredUserLevels = function () {
     }, _callee11, this);
   }));
 
-  return function getRegisteredUserLevels(_x20) {
-    return _ref12.apply(this, arguments);
+  return function getRegisteredUserLevels(_x21) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var getRegisteredUserLevelsByIp = exports.getRegisteredUserLevelsByIp = function () {
-  var _ref13 = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(ip, subnet) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(ip, subnet) {
     var query, user;
     return regeneratorRuntime.wrap(function _callee12$(_context12) {
       while (1) {
@@ -476,13 +476,13 @@ var getRegisteredUserLevelsByIp = exports.getRegisteredUserLevelsByIp = function
     }, _callee12, this);
   }));
 
-  return function getRegisteredUserLevelsByIp(_x21, _x22) {
-    return _ref13.apply(this, arguments);
+  return function getRegisteredUserLevelsByIp(_x22, _x23) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var getRegisteredUser = exports.getRegisteredUser = function () {
-  var _ref14 = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(hashpass) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(hashpass) {
     var user;
     return regeneratorRuntime.wrap(function _callee13$(_context13) {
       while (1) {
@@ -515,13 +515,13 @@ var getRegisteredUser = exports.getRegisteredUser = function () {
     }, _callee13, this);
   }));
 
-  return function getRegisteredUser(_x23) {
-    return _ref14.apply(this, arguments);
+  return function getRegisteredUser(_x24) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var getRegisteredUsers = exports.getRegisteredUsers = function () {
-  var _ref15 = _asyncToGenerator(regeneratorRuntime.mark(function _callee14() {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14() {
     var User, users;
     return regeneratorRuntime.wrap(function _callee14$(_context14) {
       while (1) {
@@ -550,12 +550,12 @@ var getRegisteredUsers = exports.getRegisteredUsers = function () {
   }));
 
   return function getRegisteredUsers() {
-    return _ref15.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var registerUser = exports.registerUser = function () {
-  var _ref16 = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(hashpass, levels, ips) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(hashpass, levels, ips) {
     var User, count;
     return regeneratorRuntime.wrap(function _callee15$(_context15) {
       while (1) {
@@ -595,14 +595,14 @@ var registerUser = exports.registerUser = function () {
     }, _callee15, this);
   }));
 
-  return function registerUser(_x24, _x25, _x26) {
-    return _ref16.apply(this, arguments);
+  return function registerUser(_x25, _x26, _x27) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var updateRegisteredUser = exports.updateRegisteredUser = function () {
-  var _ref17 = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(hashpass, levels, ips) {
-    var User, _ref18, matchedCount;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(hashpass, levels, ips) {
+    var User, _ref2, matchedCount;
 
     return regeneratorRuntime.wrap(function _callee16$(_context16) {
       while (1) {
@@ -624,8 +624,8 @@ var updateRegisteredUser = exports.updateRegisteredUser = function () {
             });
 
           case 5:
-            _ref18 = _context16.sent;
-            matchedCount = _ref18.matchedCount;
+            _ref2 = _context16.sent;
+            matchedCount = _ref2.matchedCount;
 
             if (!(matchedCount <= 0)) {
               _context16.next = 9;
@@ -642,14 +642,14 @@ var updateRegisteredUser = exports.updateRegisteredUser = function () {
     }, _callee16, this);
   }));
 
-  return function updateRegisteredUser(_x27, _x28, _x29) {
-    return _ref17.apply(this, arguments);
+  return function updateRegisteredUser(_x28, _x29, _x30) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var unregisterUser = exports.unregisterUser = function () {
-  var _ref19 = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(hashpass) {
-    var User, _ref20, deletedCount;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(hashpass) {
+    var User, _ref3, deletedCount;
 
     return regeneratorRuntime.wrap(function _callee17$(_context17) {
       while (1) {
@@ -664,8 +664,8 @@ var unregisterUser = exports.unregisterUser = function () {
             return User.deleteOne({ hashpass: hashpass });
 
           case 5:
-            _ref20 = _context17.sent;
-            deletedCount = _ref20.deletedCount;
+            _ref3 = _context17.sent;
+            deletedCount = _ref3.deletedCount;
 
             if (!(deletedCount <= 0)) {
               _context17.next = 9;
@@ -682,13 +682,13 @@ var unregisterUser = exports.unregisterUser = function () {
     }, _callee17, this);
   }));
 
-  return function unregisterUser(_x30) {
-    return _ref19.apply(this, arguments);
+  return function unregisterUser(_x31) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var addSuperuser = exports.addSuperuser = function () {
-  var _ref21 = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(hashpass, ips) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(hashpass, ips) {
     var User, count;
     return regeneratorRuntime.wrap(function _callee18$(_context18) {
       while (1) {
@@ -736,14 +736,14 @@ var addSuperuser = exports.addSuperuser = function () {
     }, _callee18, this);
   }));
 
-  return function addSuperuser(_x31, _x32) {
-    return _ref21.apply(this, arguments);
+  return function addSuperuser(_x32, _x33) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var removeSuperuser = exports.removeSuperuser = function () {
-  var _ref22 = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(hashpass) {
-    var User, _ref23, deletedCount;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(hashpass) {
+    var User, _ref4, deletedCount;
 
     return regeneratorRuntime.wrap(function _callee19$(_context19) {
       while (1) {
@@ -766,8 +766,8 @@ var removeSuperuser = exports.removeSuperuser = function () {
             return User.deleteOne({ hashpass: hashpass });
 
           case 7:
-            _ref23 = _context19.sent;
-            deletedCount = _ref23.deletedCount;
+            _ref4 = _context19.sent;
+            deletedCount = _ref4.deletedCount;
 
             if (!(deletedCount <= 0)) {
               _context19.next = 11;
@@ -784,13 +784,13 @@ var removeSuperuser = exports.removeSuperuser = function () {
     }, _callee19, this);
   }));
 
-  return function removeSuperuser(_x33) {
-    return _ref22.apply(this, arguments);
+  return function removeSuperuser(_x34) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var getSynchronizationData = exports.getSynchronizationData = function () {
-  var _ref24 = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(key) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee20(key) {
     var SynchronizationData;
     return regeneratorRuntime.wrap(function _callee20$(_context20) {
       while (1) {
@@ -815,13 +815,13 @@ var getSynchronizationData = exports.getSynchronizationData = function () {
     }, _callee20, this);
   }));
 
-  return function getSynchronizationData(_x34) {
-    return _ref24.apply(this, arguments);
+  return function getSynchronizationData(_x35) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var setSynchronizationData = exports.setSynchronizationData = function () {
-  var _ref25 = _asyncToGenerator(regeneratorRuntime.mark(function _callee21(key, data) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee21(key, data) {
     var SynchronizationData, expireAt;
     return regeneratorRuntime.wrap(function _callee21$(_context21) {
       while (1) {
@@ -855,17 +855,17 @@ var setSynchronizationData = exports.setSynchronizationData = function () {
     }, _callee21, this);
   }));
 
-  return function setSynchronizationData(_x35, _x36) {
-    return _ref25.apply(this, arguments);
+  return function setSynchronizationData(_x36, _x37) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var checkUserBan = exports.checkUserBan = function () {
-  var _ref26 = _asyncToGenerator(regeneratorRuntime.mark(function _callee22(ip, boardNames) {
-    var _ref27 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
-        write = _ref27.write,
-        geolocationInfo = _ref27.geolocationInfo;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee22(ip, boardNames) {
+    var _ref5 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
+    var write = _ref5.write;
+    var geolocationInfo = _ref5.geolocationInfo;
     var ban, bannedUser;
     return regeneratorRuntime.wrap(function _callee22$(_context22) {
       while (1) {
@@ -920,13 +920,13 @@ var checkUserBan = exports.checkUserBan = function () {
     }, _callee22, this);
   }));
 
-  return function checkUserBan(_x37, _x38) {
-    return _ref26.apply(this, arguments);
+  return function checkUserBan(_x38, _x39, _x40) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var checkUserPermissions = exports.checkUserPermissions = function () {
-  var _ref28 = _asyncToGenerator(regeneratorRuntime.mark(function _callee23(req, boardName, postNumber, permission, password) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee23(req, boardName, postNumber, permission, password) {
     var board, Post, post, user, threadNumber, Thread, thread;
     return regeneratorRuntime.wrap(function _callee23$(_context23) {
       while (1) {
@@ -967,110 +967,111 @@ var checkUserPermissions = exports.checkUserPermissions = function () {
             throw new Error(Tools.translate('Not such post: $[1]', '', '/' + boardName + '/' + postNumber));
 
           case 11:
-            user = post.user, threadNumber = post.threadNumber;
+            user = post.user;
+            threadNumber = post.threadNumber;
 
             if (!req.isSuperuser()) {
-              _context23.next = 14;
+              _context23.next = 15;
               break;
             }
 
             return _context23.abrupt('return');
 
-          case 14:
+          case 15:
             if (!(Tools.compareRegisteredUserLevels(req.level(boardName), Permissions[permission]()) >= 0)) {
-              _context23.next = 21;
+              _context23.next = 22;
               break;
             }
 
             if (!(Tools.compareRegisteredUserLevels(req.level(boardName), 'USER') > 0 && Tools.compareRegisteredUserLevels(req.level(boardName), user.level) > 0)) {
-              _context23.next = 17;
+              _context23.next = 18;
               break;
             }
 
             return _context23.abrupt('return');
 
-          case 17:
+          case 18:
             if (!(req.hashpass && req.hashpass === user.hashpass)) {
-              _context23.next = 19;
+              _context23.next = 20;
               break;
             }
 
             return _context23.abrupt('return');
 
-          case 19:
+          case 20:
             if (!(password && password === user.password)) {
-              _context23.next = 21;
+              _context23.next = 22;
               break;
             }
 
             return _context23.abrupt('return');
 
-          case 21:
+          case 22:
             if (board.opModeration) {
-              _context23.next = 23;
+              _context23.next = 24;
               break;
             }
 
             throw new Error(Tools.translate('Not enough rights'));
 
-          case 23:
-            _context23.next = 25;
+          case 24:
+            _context23.next = 26;
             return client.collection('thread');
 
-          case 25:
+          case 26:
             Thread = _context23.sent;
-            _context23.next = 28;
+            _context23.next = 29;
             return Thread.findOne({
               boardName: boardName,
               number: threadNumber
             });
 
-          case 28:
+          case 29:
             thread = _context23.sent;
 
             if (thread) {
-              _context23.next = 31;
+              _context23.next = 32;
               break;
             }
 
             throw new Error(Tools.translate('Not such thread: $[1]', '', '/' + boardName + '/' + threadNumber));
 
-          case 31:
+          case 32:
             if (!(thread.user.ip !== req.ip && (!req.hashpass || req.hashpass !== thread.user.hashpass))) {
-              _context23.next = 33;
+              _context23.next = 34;
               break;
             }
 
             throw new Error(Tools.translate('Not enough rights'));
 
-          case 33:
+          case 34:
             if (!(Tools.compareRegisteredUserLevels(req.level(boardName), user.level) >= 0)) {
-              _context23.next = 35;
+              _context23.next = 36;
               break;
             }
 
             return _context23.abrupt('return');
 
-          case 35:
+          case 36:
             if (!(req.hashpass && req.hashpass === user.hashpass)) {
-              _context23.next = 37;
+              _context23.next = 38;
               break;
             }
 
             return _context23.abrupt('return');
 
-          case 37:
+          case 38:
             if (!(password && password === user.password)) {
-              _context23.next = 39;
+              _context23.next = 40;
               break;
             }
 
             return _context23.abrupt('return');
-
-          case 39:
-            throw new Error(Tools.translate('Not enough rights'));
 
           case 40:
+            throw new Error(Tools.translate('Not enough rights'));
+
+          case 41:
           case 'end':
             return _context23.stop();
         }
@@ -1078,13 +1079,13 @@ var checkUserPermissions = exports.checkUserPermissions = function () {
     }, _callee23, this);
   }));
 
-  return function checkUserPermissions(_x40, _x41, _x42, _x43, _x44) {
-    return _ref28.apply(this, arguments);
+  return function checkUserPermissions(_x42, _x43, _x44, _x45, _x46) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var updatePostBanInfo = exports.updatePostBanInfo = function () {
-  var _ref29 = _asyncToGenerator(regeneratorRuntime.mark(function _callee24(boardName, postNumber, bannedFor) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee24(boardName, postNumber, bannedFor) {
     var Post, result, post;
     return regeneratorRuntime.wrap(function _callee24$(_context24) {
       while (1) {
@@ -1147,13 +1148,13 @@ var updatePostBanInfo = exports.updatePostBanInfo = function () {
     }, _callee24, this);
   }));
 
-  return function updatePostBanInfo(_x45, _x46, _x47) {
-    return _ref29.apply(this, arguments);
+  return function updatePostBanInfo(_x47, _x48, _x49) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var banUser = exports.banUser = function () {
-  var _ref30 = _asyncToGenerator(regeneratorRuntime.mark(function _callee27(ip, newBans, subnet) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee27(ip, newBans, subnet) {
     var bannedUser, oldBans, BannedUser, _getPostsToUpdate, postsBannedFor, postsNotBannedFor;
 
     return regeneratorRuntime.wrap(function _callee27$(_context27) {
@@ -1178,7 +1179,7 @@ var banUser = exports.banUser = function () {
             oldBans = bannedUser.bans;
             _context27.next = 9;
             return Tools.series(oldBans, function () {
-              var _ref31 = _asyncToGenerator(regeneratorRuntime.mark(function _callee25(_1, boardName) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee25(_1, boardName) {
                 return regeneratorRuntime.wrap(function _callee25$(_context25) {
                   while (1) {
                     switch (_context25.prev = _context25.next) {
@@ -1194,8 +1195,8 @@ var banUser = exports.banUser = function () {
                 }, _callee25, this);
               }));
 
-              return function (_x51, _x52) {
-                return _ref31.apply(this, arguments);
+              return function (_x53, _x54) {
+                return ref.apply(this, arguments);
               };
             }());
 
@@ -1232,7 +1233,7 @@ var banUser = exports.banUser = function () {
             return Tools.series((0, _underscore2.default)(newBans).pick(function (ban) {
               return ban.expiresAt;
             }), function () {
-              var _ref32 = _asyncToGenerator(regeneratorRuntime.mark(function _callee26(ban) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee26(ban) {
                 var delay;
                 return regeneratorRuntime.wrap(function _callee26$(_context26) {
                   while (1) {
@@ -1250,31 +1251,33 @@ var banUser = exports.banUser = function () {
                 }, _callee26, this);
               }));
 
-              return function (_x53) {
-                return _ref32.apply(this, arguments);
+              return function (_x55) {
+                return ref.apply(this, arguments);
               };
             }());
 
           case 21:
-            _getPostsToUpdate = getPostsToUpdate(oldBans, newBans), postsBannedFor = _getPostsToUpdate.postsBannedFor, postsNotBannedFor = _getPostsToUpdate.postsNotBannedFor;
-            _context27.next = 24;
-            return Tools.series(postsBannedFor, function (_ref33) {
-              var postNumber = _ref33.postNumber,
-                  boardName = _ref33.boardName;
+            _getPostsToUpdate = getPostsToUpdate(oldBans, newBans);
+            postsBannedFor = _getPostsToUpdate.postsBannedFor;
+            postsNotBannedFor = _getPostsToUpdate.postsNotBannedFor;
+            _context27.next = 26;
+            return Tools.series(postsBannedFor, function (_ref6) {
+              var postNumber = _ref6.postNumber;
+              var boardName = _ref6.boardName;
 
               return updatePostBanInfo(boardName, postNumber, true);
             });
 
-          case 24:
-            _context27.next = 26;
-            return Tools.series(postsNotBannedFor, function (_ref34) {
-              var postNumber = _ref34.postNumber,
-                  boardName = _ref34.boardName;
+          case 26:
+            _context27.next = 28;
+            return Tools.series(postsNotBannedFor, function (_ref7) {
+              var postNumber = _ref7.postNumber;
+              var boardName = _ref7.boardName;
 
               return updatePostBanInfo(boardName, postNumber, false);
             });
 
-          case 26:
+          case 28:
           case 'end':
             return _context27.stop();
         }
@@ -1282,14 +1285,14 @@ var banUser = exports.banUser = function () {
     }, _callee27, this);
   }));
 
-  return function banUser(_x48, _x49, _x50) {
-    return _ref30.apply(this, arguments);
+  return function banUser(_x50, _x51, _x52) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var updateBanOnMessage = function () {
-  var _ref35 = _asyncToGenerator(regeneratorRuntime.mark(function _callee28(message) {
-    var ip, boardName, BannedUser, _ref36, bannedUser, postNumber;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee28(message) {
+    var ip, boardName, BannedUser, _ref8, bannedUser, postNumber;
 
     return regeneratorRuntime.wrap(function _callee28$(_context28) {
       while (1) {
@@ -1336,8 +1339,8 @@ var updateBanOnMessage = function () {
             });
 
           case 12:
-            _ref36 = _context28.sent;
-            bannedUser = _ref36.value;
+            _ref8 = _context28.sent;
+            bannedUser = _ref8.value;
 
             if (!(!bannedUser || bannedUser.bans.length !== 1)) {
               _context28.next = 16;
@@ -1382,13 +1385,13 @@ var updateBanOnMessage = function () {
     }, _callee28, this, [[0, 24]]);
   }));
 
-  return function updateBanOnMessage(_x54) {
-    return _ref35.apply(this, arguments);
+  return function updateBanOnMessage(_x56) {
+    return ref.apply(this, arguments);
   };
 }();
 
 var initializeUserBansMonitoring = exports.initializeUserBansMonitoring = function () {
-  var _ref37 = _asyncToGenerator(regeneratorRuntime.mark(function _callee29() {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee29() {
     return regeneratorRuntime.wrap(function _callee29$(_context29) {
       while (1) {
         switch (_context29.prev = _context29.next) {
@@ -1409,7 +1412,7 @@ var initializeUserBansMonitoring = exports.initializeUserBansMonitoring = functi
   }));
 
   return function initializeUserBansMonitoring() {
-    return _ref37.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
@@ -1473,7 +1476,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 var client = (0, _mongodbClientFactory2.default)();
 
@@ -1504,7 +1507,7 @@ function transformIPBans(bans) {
 var ipBans = _fsWatcher2.default.createWatchedResource(__dirname + '/../../misc/user-bans.json', function (path) {
   return transformIPBans(require(path));
 }, function () {
-  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(path) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(path) {
     var data;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -1527,7 +1530,7 @@ var ipBans = _fsWatcher2.default.createWatchedResource(__dirname + '/../../misc/
   }));
 
   return function (_x) {
-    return _ref.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }()) || {};
 
@@ -1553,7 +1556,7 @@ function transformGeoBans(bans) {
 var geoBans = _fsWatcher2.default.createWatchedResource(__dirname + '/../../misc/geo-bans.json', function (path) {
   return transformGeoBans(require(path));
 }, function () {
-  var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(path) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(path) {
     var data;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -1576,7 +1579,7 @@ var geoBans = _fsWatcher2.default.createWatchedResource(__dirname + '/../../misc
   }));
 
   return function (_x2) {
-    return _ref2.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }()) || new Map();
 

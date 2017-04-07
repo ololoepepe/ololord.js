@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.copyFiles = exports.getPostFileCount = exports.editAudioTags = exports.editFileRating = exports.deleteFile = exports.removeFiles = exports.addFilesToPost = exports.getFileInfosByHashes = exports.fileInfoExistsByHash = exports.fileInfoExistsByName = exports.getFileInfoByHash = exports.getFileInfoByName = undefined;
 
 var getFileInfoByName = exports.getFileInfoByName = function () {
-  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(name) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(name) {
     var Post, post;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -42,12 +42,12 @@ var getFileInfoByName = exports.getFileInfoByName = function () {
   }));
 
   return function getFileInfoByName(_x) {
-    return _ref.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var getFileInfoByHash = exports.getFileInfoByHash = function () {
-  var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(hash) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(hash) {
     var Post, post;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -83,12 +83,12 @@ var getFileInfoByHash = exports.getFileInfoByHash = function () {
   }));
 
   return function getFileInfoByHash(_x2) {
-    return _ref2.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var fileInfoExistsByName = exports.fileInfoExistsByName = function () {
-  var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(name) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(name) {
     var Post, count;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
@@ -115,12 +115,12 @@ var fileInfoExistsByName = exports.fileInfoExistsByName = function () {
   }));
 
   return function fileInfoExistsByName(_x3) {
-    return _ref3.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var fileInfoExistsByHash = exports.fileInfoExistsByHash = function () {
-  var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(hash) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(hash) {
     var Post, count;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
@@ -147,12 +147,12 @@ var fileInfoExistsByHash = exports.fileInfoExistsByHash = function () {
   }));
 
   return function fileInfoExistsByHash(_x4) {
-    return _ref4.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var getFileInfosByHashes = exports.getFileInfosByHashes = function () {
-  var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(hashes) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(hashes) {
     var Post, posts, fileInfosAll, fileInfos;
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
@@ -190,8 +190,8 @@ var getFileInfosByHashes = exports.getFileInfosByHashes = function () {
 
           case 10:
             posts = _context5.sent;
-            fileInfosAll = (0, _underscore2.default)(posts.map(function (_ref6) {
-              var fileInfos = _ref6.fileInfos;
+            fileInfosAll = (0, _underscore2.default)(posts.map(function (_ref) {
+              var fileInfos = _ref.fileInfos;
               return fileInfos[0];
             }));
             fileInfos = [];
@@ -214,12 +214,12 @@ var getFileInfosByHashes = exports.getFileInfosByHashes = function () {
   }));
 
   return function getFileInfosByHashes(_x5) {
-    return _ref5.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var addFilesToPost = exports.addFilesToPost = function () {
-  var _ref7 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(boardName, postNumber, files) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(boardName, postNumber, files) {
     var Post, result, post;
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
@@ -267,15 +267,15 @@ var addFilesToPost = exports.addFilesToPost = function () {
   }));
 
   return function addFilesToPost(_x6, _x7, _x8) {
-    return _ref7.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var removeFile = function () {
-  var _ref8 = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(_ref9) {
-    var boardName = _ref9.boardName,
-        name = _ref9.name,
-        thumb = _ref9.thumb;
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(_ref2) {
+    var boardName = _ref2.boardName;
+    var name = _ref2.name;
+    var thumb = _ref2.thumb;
     var path;
     return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
@@ -320,12 +320,12 @@ var removeFile = function () {
   }));
 
   return function removeFile(_x9) {
-    return _ref8.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var removeFiles = exports.removeFiles = function () {
-  var _ref10 = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(fileInfos) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(fileInfos) {
     return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
         switch (_context8.prev = _context8.next) {
@@ -342,12 +342,12 @@ var removeFiles = exports.removeFiles = function () {
   }));
 
   return function removeFiles(_x10) {
-    return _ref10.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var deleteFile = exports.deleteFile = function () {
-  var _ref11 = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(fileName) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(fileName) {
     var Post, result, post;
     return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
@@ -400,12 +400,12 @@ var deleteFile = exports.deleteFile = function () {
   }));
 
   return function deleteFile(_x11) {
-    return _ref11.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var editFileRating = exports.editFileRating = function () {
-  var _ref12 = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(fileName, rating) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(fileName, rating) {
     var Post, result, post;
     return regeneratorRuntime.wrap(function _callee10$(_context10) {
       while (1) {
@@ -456,12 +456,12 @@ var editFileRating = exports.editFileRating = function () {
   }));
 
   return function editFileRating(_x12, _x13) {
-    return _ref12.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var editAudioTags = exports.editAudioTags = function () {
-  var _ref13 = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(fileName, fields) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(fileName, fields) {
     var Post, extraData, result, post;
     return regeneratorRuntime.wrap(function _callee11$(_context11) {
       while (1) {
@@ -477,13 +477,13 @@ var editAudioTags = exports.editAudioTags = function () {
                 tagName: tagName,
                 value: fields[tagName]
               };
-            }).filter(function (_ref14) {
-              var value = _ref14.value;
+            }).filter(function (_ref3) {
+              var value = _ref3.value;
 
               return value && typeof value === 'string';
-            }).reduce(function (acc, _ref15) {
-              var tagName = _ref15.tagName,
-                  value = _ref15.value;
+            }).reduce(function (acc, _ref4) {
+              var tagName = _ref4.tagName;
+              var value = _ref4.value;
 
               acc[tagName] = value;
               return acc;
@@ -524,12 +524,12 @@ var editAudioTags = exports.editAudioTags = function () {
   }));
 
   return function editAudioTags(_x14, _x15) {
-    return _ref13.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var getPostFileCount = exports.getPostFileCount = function () {
-  var _ref16 = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(boardName, postNumber) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(boardName, postNumber) {
     var Post, post;
     return regeneratorRuntime.wrap(function _callee12$(_context12) {
       while (1) {
@@ -568,12 +568,12 @@ var getPostFileCount = exports.getPostFileCount = function () {
   }));
 
   return function getPostFileCount(_x16, _x17) {
-    return _ref16.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
 var copyFiles = exports.copyFiles = function () {
-  var _ref17 = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(fileInfos, sourceBoardName, targetBoardName, transaction) {
+  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(fileInfos, sourceBoardName, targetBoardName, transaction) {
     var sourcePath, sourceThumbPath, targetPath, targetThumbPath;
     return regeneratorRuntime.wrap(function _callee14$(_context14) {
       while (1) {
@@ -593,7 +593,7 @@ var copyFiles = exports.copyFiles = function () {
           case 8:
             _context14.next = 10;
             return Tools.series(fileInfos, function () {
-              var _ref18 = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(fileInfo) {
+              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13(fileInfo) {
                 var oldFileName, oldThumbName, baseName, newFilePath, newThumbPath;
                 return regeneratorRuntime.wrap(function _callee13$(_context13) {
                   while (1) {
@@ -633,7 +633,7 @@ var copyFiles = exports.copyFiles = function () {
               }));
 
               return function (_x22) {
-                return _ref18.apply(this, arguments);
+                return ref.apply(this, arguments);
               };
             }(), true);
 
@@ -649,7 +649,7 @@ var copyFiles = exports.copyFiles = function () {
   }));
 
   return function copyFiles(_x18, _x19, _x20, _x21) {
-    return _ref17.apply(this, arguments);
+    return ref.apply(this, arguments);
   };
 }();
 
@@ -689,7 +689,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 var mkpath = (0, _promisifyNode2.default)('mkpath');
 

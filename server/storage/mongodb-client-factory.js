@@ -35,7 +35,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -96,7 +96,7 @@ var MongoDBClient = function () {
   _createClass(MongoDBClient, [{
     key: 'addUser',
     value: function () {
-      var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
         var _db$addUser;
 
         for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
@@ -125,8 +125,8 @@ var MongoDBClient = function () {
         }, _callee, this);
       }));
 
-      function addUser() {
-        return _ref.apply(this, arguments);
+      function addUser(_x) {
+        return ref.apply(this, arguments);
       }
 
       return addUser;
@@ -134,7 +134,7 @@ var MongoDBClient = function () {
   }, {
     key: 'admin',
     value: function () {
-      var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
         var _db$admin;
 
         for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
@@ -163,8 +163,8 @@ var MongoDBClient = function () {
         }, _callee2, this);
       }));
 
-      function admin() {
-        return _ref2.apply(this, arguments);
+      function admin(_x2) {
+        return ref.apply(this, arguments);
       }
 
       return admin;
@@ -172,7 +172,7 @@ var MongoDBClient = function () {
   }, {
     key: 'authenticate',
     value: function () {
-      var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
         var _db$authenticate;
 
         for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
@@ -201,8 +201,8 @@ var MongoDBClient = function () {
         }, _callee3, this);
       }));
 
-      function authenticate() {
-        return _ref3.apply(this, arguments);
+      function authenticate(_x3) {
+        return ref.apply(this, arguments);
       }
 
       return authenticate;
@@ -210,7 +210,7 @@ var MongoDBClient = function () {
   }, {
     key: 'close',
     value: function () {
-      var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
         var _db$close;
 
         for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
@@ -239,8 +239,8 @@ var MongoDBClient = function () {
         }, _callee4, this);
       }));
 
-      function close() {
-        return _ref4.apply(this, arguments);
+      function close(_x4) {
+        return ref.apply(this, arguments);
       }
 
       return close;
@@ -248,7 +248,7 @@ var MongoDBClient = function () {
   }, {
     key: 'collection',
     value: function () {
-      var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
         var _db$collection;
 
         for (var _len5 = arguments.length, args = Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
@@ -277,8 +277,8 @@ var MongoDBClient = function () {
         }, _callee5, this);
       }));
 
-      function collection() {
-        return _ref5.apply(this, arguments);
+      function collection(_x5) {
+        return ref.apply(this, arguments);
       }
 
       return collection;
@@ -286,7 +286,7 @@ var MongoDBClient = function () {
   }, {
     key: 'collections',
     value: function () {
-      var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6() {
         var _db$collections;
 
         for (var _len6 = arguments.length, args = Array(_len6), _key6 = 0; _key6 < _len6; _key6++) {
@@ -315,8 +315,8 @@ var MongoDBClient = function () {
         }, _callee6, this);
       }));
 
-      function collections() {
-        return _ref6.apply(this, arguments);
+      function collections(_x6) {
+        return ref.apply(this, arguments);
       }
 
       return collections;
@@ -324,7 +324,7 @@ var MongoDBClient = function () {
   }, {
     key: 'command',
     value: function () {
-      var _ref7 = _asyncToGenerator(regeneratorRuntime.mark(function _callee7() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7() {
         var _db$command;
 
         for (var _len7 = arguments.length, args = Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
@@ -353,8 +353,8 @@ var MongoDBClient = function () {
         }, _callee7, this);
       }));
 
-      function command() {
-        return _ref7.apply(this, arguments);
+      function command(_x7) {
+        return ref.apply(this, arguments);
       }
 
       return command;
@@ -362,7 +362,7 @@ var MongoDBClient = function () {
   }, {
     key: 'createCollection',
     value: function () {
-      var _ref8 = _asyncToGenerator(regeneratorRuntime.mark(function _callee8() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8() {
         var _db$createCollection;
 
         for (var _len8 = arguments.length, args = Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {
@@ -391,8 +391,8 @@ var MongoDBClient = function () {
         }, _callee8, this);
       }));
 
-      function createCollection() {
-        return _ref8.apply(this, arguments);
+      function createCollection(_x8) {
+        return ref.apply(this, arguments);
       }
 
       return createCollection;
@@ -400,7 +400,7 @@ var MongoDBClient = function () {
   }, {
     key: 'createIndex',
     value: function () {
-      var _ref9 = _asyncToGenerator(regeneratorRuntime.mark(function _callee9() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9() {
         var _db$createIndex;
 
         for (var _len9 = arguments.length, args = Array(_len9), _key9 = 0; _key9 < _len9; _key9++) {
@@ -429,8 +429,8 @@ var MongoDBClient = function () {
         }, _callee9, this);
       }));
 
-      function createIndex() {
-        return _ref9.apply(this, arguments);
+      function createIndex(_x9) {
+        return ref.apply(this, arguments);
       }
 
       return createIndex;
@@ -438,7 +438,7 @@ var MongoDBClient = function () {
   }, {
     key: 'db',
     value: function () {
-      var _ref10 = _asyncToGenerator(regeneratorRuntime.mark(function _callee10() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10() {
         var _db$db;
 
         for (var _len10 = arguments.length, args = Array(_len10), _key10 = 0; _key10 < _len10; _key10++) {
@@ -467,8 +467,8 @@ var MongoDBClient = function () {
         }, _callee10, this);
       }));
 
-      function db() {
-        return _ref10.apply(this, arguments);
+      function db(_x10) {
+        return ref.apply(this, arguments);
       }
 
       return db;
@@ -476,7 +476,7 @@ var MongoDBClient = function () {
   }, {
     key: 'dropCollection',
     value: function () {
-      var _ref11 = _asyncToGenerator(regeneratorRuntime.mark(function _callee11() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11() {
         var _db$dropCollection;
 
         for (var _len11 = arguments.length, args = Array(_len11), _key11 = 0; _key11 < _len11; _key11++) {
@@ -505,8 +505,8 @@ var MongoDBClient = function () {
         }, _callee11, this);
       }));
 
-      function dropCollection() {
-        return _ref11.apply(this, arguments);
+      function dropCollection(_x11) {
+        return ref.apply(this, arguments);
       }
 
       return dropCollection;
@@ -514,7 +514,7 @@ var MongoDBClient = function () {
   }, {
     key: 'dropDatabase',
     value: function () {
-      var _ref12 = _asyncToGenerator(regeneratorRuntime.mark(function _callee12() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12() {
         var _db$dropDatabase;
 
         for (var _len12 = arguments.length, args = Array(_len12), _key12 = 0; _key12 < _len12; _key12++) {
@@ -543,8 +543,8 @@ var MongoDBClient = function () {
         }, _callee12, this);
       }));
 
-      function dropDatabase() {
-        return _ref12.apply(this, arguments);
+      function dropDatabase(_x12) {
+        return ref.apply(this, arguments);
       }
 
       return dropDatabase;
@@ -552,7 +552,7 @@ var MongoDBClient = function () {
   }, {
     key: 'executeDbAdminCommand',
     value: function () {
-      var _ref13 = _asyncToGenerator(regeneratorRuntime.mark(function _callee13() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13() {
         var _db$executeDbAdminCom;
 
         for (var _len13 = arguments.length, args = Array(_len13), _key13 = 0; _key13 < _len13; _key13++) {
@@ -581,8 +581,8 @@ var MongoDBClient = function () {
         }, _callee13, this);
       }));
 
-      function executeDbAdminCommand() {
-        return _ref13.apply(this, arguments);
+      function executeDbAdminCommand(_x13) {
+        return ref.apply(this, arguments);
       }
 
       return executeDbAdminCommand;
@@ -590,7 +590,7 @@ var MongoDBClient = function () {
   }, {
     key: 'indexInformation',
     value: function () {
-      var _ref14 = _asyncToGenerator(regeneratorRuntime.mark(function _callee14() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14() {
         var _db$indexInformation;
 
         for (var _len14 = arguments.length, args = Array(_len14), _key14 = 0; _key14 < _len14; _key14++) {
@@ -619,8 +619,8 @@ var MongoDBClient = function () {
         }, _callee14, this);
       }));
 
-      function indexInformation() {
-        return _ref14.apply(this, arguments);
+      function indexInformation(_x14) {
+        return ref.apply(this, arguments);
       }
 
       return indexInformation;
@@ -628,7 +628,7 @@ var MongoDBClient = function () {
   }, {
     key: 'listCollections',
     value: function () {
-      var _ref15 = _asyncToGenerator(regeneratorRuntime.mark(function _callee15() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15() {
         var _db$listCollections;
 
         for (var _len15 = arguments.length, args = Array(_len15), _key15 = 0; _key15 < _len15; _key15++) {
@@ -657,8 +657,8 @@ var MongoDBClient = function () {
         }, _callee15, this);
       }));
 
-      function listCollections() {
-        return _ref15.apply(this, arguments);
+      function listCollections(_x15) {
+        return ref.apply(this, arguments);
       }
 
       return listCollections;
@@ -666,7 +666,7 @@ var MongoDBClient = function () {
   }, {
     key: 'logout',
     value: function () {
-      var _ref16 = _asyncToGenerator(regeneratorRuntime.mark(function _callee16() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16() {
         var _db$logout;
 
         for (var _len16 = arguments.length, args = Array(_len16), _key16 = 0; _key16 < _len16; _key16++) {
@@ -695,8 +695,8 @@ var MongoDBClient = function () {
         }, _callee16, this);
       }));
 
-      function logout() {
-        return _ref16.apply(this, arguments);
+      function logout(_x16) {
+        return ref.apply(this, arguments);
       }
 
       return logout;
@@ -704,7 +704,7 @@ var MongoDBClient = function () {
   }, {
     key: 'open',
     value: function () {
-      var _ref17 = _asyncToGenerator(regeneratorRuntime.mark(function _callee17() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17() {
         var _db$open;
 
         for (var _len17 = arguments.length, args = Array(_len17), _key17 = 0; _key17 < _len17; _key17++) {
@@ -733,8 +733,8 @@ var MongoDBClient = function () {
         }, _callee17, this);
       }));
 
-      function open() {
-        return _ref17.apply(this, arguments);
+      function open(_x17) {
+        return ref.apply(this, arguments);
       }
 
       return open;
@@ -742,7 +742,7 @@ var MongoDBClient = function () {
   }, {
     key: 'removeUser',
     value: function () {
-      var _ref18 = _asyncToGenerator(regeneratorRuntime.mark(function _callee18() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18() {
         var _db$removeUser;
 
         for (var _len18 = arguments.length, args = Array(_len18), _key18 = 0; _key18 < _len18; _key18++) {
@@ -771,8 +771,8 @@ var MongoDBClient = function () {
         }, _callee18, this);
       }));
 
-      function removeUser() {
-        return _ref18.apply(this, arguments);
+      function removeUser(_x18) {
+        return ref.apply(this, arguments);
       }
 
       return removeUser;
@@ -780,7 +780,7 @@ var MongoDBClient = function () {
   }, {
     key: 'renameCollection',
     value: function () {
-      var _ref19 = _asyncToGenerator(regeneratorRuntime.mark(function _callee19() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19() {
         var _db$renameCollection;
 
         for (var _len19 = arguments.length, args = Array(_len19), _key19 = 0; _key19 < _len19; _key19++) {
@@ -809,8 +809,8 @@ var MongoDBClient = function () {
         }, _callee19, this);
       }));
 
-      function renameCollection() {
-        return _ref19.apply(this, arguments);
+      function renameCollection(_x19) {
+        return ref.apply(this, arguments);
       }
 
       return renameCollection;
@@ -818,7 +818,7 @@ var MongoDBClient = function () {
   }, {
     key: 'stats',
     value: function () {
-      var _ref20 = _asyncToGenerator(regeneratorRuntime.mark(function _callee20() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee20() {
         var _db$stats;
 
         for (var _len20 = arguments.length, args = Array(_len20), _key20 = 0; _key20 < _len20; _key20++) {
@@ -847,8 +847,8 @@ var MongoDBClient = function () {
         }, _callee20, this);
       }));
 
-      function stats() {
-        return _ref20.apply(this, arguments);
+      function stats(_x20) {
+        return ref.apply(this, arguments);
       }
 
       return stats;
@@ -856,7 +856,7 @@ var MongoDBClient = function () {
   }, {
     key: 'unref',
     value: function () {
-      var _ref21 = _asyncToGenerator(regeneratorRuntime.mark(function _callee21() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee21() {
         var _db$unref;
 
         for (var _len21 = arguments.length, args = Array(_len21), _key21 = 0; _key21 < _len21; _key21++) {
@@ -885,8 +885,8 @@ var MongoDBClient = function () {
         }, _callee21, this);
       }));
 
-      function unref() {
-        return _ref21.apply(this, arguments);
+      function unref(_x21) {
+        return ref.apply(this, arguments);
       }
 
       return unref;
@@ -894,11 +894,11 @@ var MongoDBClient = function () {
   }, {
     key: 'createIndexes',
     value: function () {
-      var _ref22 = _asyncToGenerator(regeneratorRuntime.mark(function _callee24() {
-        var _ref23 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-            dropExisting = _ref23.dropExisting,
-            dropAll = _ref23.dropAll;
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee24() {
+        var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
+        var dropExisting = _ref.dropExisting;
+        var dropAll = _ref.dropAll;
         var db;
         return regeneratorRuntime.wrap(function _callee24$(_context24) {
           while (1) {
@@ -911,7 +911,7 @@ var MongoDBClient = function () {
                 db = this._db;
                 _context24.next = 5;
                 return Tools.series(INDEXES, function () {
-                  var _ref24 = _asyncToGenerator(regeneratorRuntime.mark(function _callee23(indexes, collectionName) {
+                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee23(indexes, collectionName) {
                     var collection;
                     return regeneratorRuntime.wrap(function _callee23$(_context23) {
                       while (1) {
@@ -929,10 +929,10 @@ var MongoDBClient = function () {
 
                           case 4:
                             return _context23.abrupt('return', Tools.series(indexes, function () {
-                              var _ref25 = _asyncToGenerator(regeneratorRuntime.mark(function _callee22(_ref26, name) {
-                                var index = _ref26.index,
-                                    _ref26$options = _ref26.options,
-                                    options = _ref26$options === undefined ? {} : _ref26$options;
+                              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee22(_ref2, name) {
+                                var index = _ref2.index;
+                                var _ref2$options = _ref2.options;
+                                var options = _ref2$options === undefined ? {} : _ref2$options;
                                 return regeneratorRuntime.wrap(function _callee22$(_context22) {
                                   while (1) {
                                     switch (_context22.prev = _context22.next) {
@@ -961,8 +961,8 @@ var MongoDBClient = function () {
                                 }, _callee22, this);
                               }));
 
-                              return function (_x4, _x5) {
-                                return _ref25.apply(this, arguments);
+                              return function (_x26, _x27) {
+                                return ref.apply(this, arguments);
                               };
                             }()));
 
@@ -974,8 +974,8 @@ var MongoDBClient = function () {
                     }, _callee23, this);
                   }));
 
-                  return function (_x2, _x3) {
-                    return _ref24.apply(this, arguments);
+                  return function (_x24, _x25) {
+                    return ref.apply(this, arguments);
                   };
                 }());
 
@@ -987,8 +987,8 @@ var MongoDBClient = function () {
         }, _callee24, this);
       }));
 
-      function createIndexes() {
-        return _ref22.apply(this, arguments);
+      function createIndexes(_x22) {
+        return ref.apply(this, arguments);
       }
 
       return createIndexes;
@@ -996,7 +996,7 @@ var MongoDBClient = function () {
   }, {
     key: 'waitForConnected',
     value: function () {
-      var _ref27 = _asyncToGenerator(regeneratorRuntime.mark(function _callee25() {
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee25() {
         return regeneratorRuntime.wrap(function _callee25$(_context25) {
           while (1) {
             switch (_context25.prev = _context25.next) {
@@ -1022,7 +1022,7 @@ var MongoDBClient = function () {
       }));
 
       function waitForConnected() {
-        return _ref27.apply(this, arguments);
+        return ref.apply(this, arguments);
       }
 
       return waitForConnected;

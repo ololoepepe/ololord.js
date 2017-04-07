@@ -30,7 +30,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -59,60 +59,61 @@ var Captcha = function () {
   }, {
     key: 'checkCaptcha',
     value: function () {
-      var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(req) {
-        var fields = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(req) {
+        var fields = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
         var boardName, captchaEngine, board, quota, supportedCaptchaEngines, ceid, captcha;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                boardName = fields.boardName, captchaEngine = fields.captchaEngine;
+                boardName = fields.boardName;
+                captchaEngine = fields.captchaEngine;
                 board = _board2.default.board(boardName);
 
                 if (board) {
-                  _context.next = 4;
+                  _context.next = 5;
                   break;
                 }
 
                 throw new Error(Tools.translate('Invalid board'));
 
-              case 4:
+              case 5:
                 if (board.captchaEnabled) {
-                  _context.next = 6;
+                  _context.next = 7;
                   break;
                 }
 
                 return _context.abrupt('return');
 
-              case 6:
-                _context.next = 8;
+              case 7:
+                _context.next = 9;
                 return UsersModel.getUserCaptchaQuota(boardName, req.hashpass || req.ip);
 
-              case 8:
+              case 9:
                 quota = _context.sent;
 
                 if (!(board.captchaQuota > 0 && +quota > 0)) {
-                  _context.next = 13;
+                  _context.next = 14;
                   break;
                 }
 
-                _context.next = 12;
+                _context.next = 13;
                 return UsersModel.useCaptcha(boardName, req.hashpass || req.ip);
 
-              case 12:
+              case 13:
                 return _context.abrupt('return', _context.sent);
 
-              case 13:
+              case 14:
                 supportedCaptchaEngines = board.supportedCaptchaEngines;
 
                 if (!(supportedCaptchaEngines.length < 1)) {
-                  _context.next = 16;
+                  _context.next = 17;
                   break;
                 }
 
                 throw new Error(Tools.translate('Internal error: no captcha engine'));
 
-              case 16:
+              case 17:
                 ceid = captchaEngine || null;
 
                 if (!ceid || !(0, _underscore2.default)(supportedCaptchaEngines).contains(ceid)) {
@@ -125,24 +126,24 @@ var Captcha = function () {
                 captcha = Captcha.captcha(ceid);
 
                 if (captcha) {
-                  _context.next = 21;
+                  _context.next = 22;
                   break;
                 }
 
                 throw new Error(Tools.translate('Invalid captcha engine'));
 
-              case 21:
-                _context.next = 23;
+              case 22:
+                _context.next = 24;
                 return captcha.checkCaptcha(req.hashpass || req.ip, fields);
 
-              case 23:
-                _context.next = 25;
+              case 24:
+                _context.next = 26;
                 return UsersModel.setUserCaptchaQuota(boardName, req.hashpass || req.ip, board.captchaQuota);
 
-              case 25:
+              case 26:
                 return _context.abrupt('return', _context.sent);
 
-              case 26:
+              case 27:
               case 'end':
                 return _context.stop();
             }
@@ -150,8 +151,8 @@ var Captcha = function () {
         }, _callee, this);
       }));
 
-      function checkCaptcha(_x) {
-        return _ref.apply(this, arguments);
+      function checkCaptcha(_x, _x2) {
+        return ref.apply(this, arguments);
       }
 
       return checkCaptcha;
