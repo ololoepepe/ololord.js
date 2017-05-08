@@ -8,6 +8,7 @@ COPY ./sqlite/ /app/sqlite/
 COPY ./tmp/ /app/tmp/
 COPY ./translations/ /app/translations/
 COPY ./views/ /app/views/
+COPY ./wait-for-it.sh /app/
 
 WORKDIR /app
 
