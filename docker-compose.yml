@@ -8,7 +8,7 @@ services:
       - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
       - ${VOLUME_PATH_PUBLIC}:/var/www:ro
     ports:
-      - ${OLOLORDJS_NGINX_PORT}:80
+      - ${OLOLORDJS_NGINX_IP}:${OLOLORDJS_NGINX_PORT}:80
     networks:
       ololordjs:
         ipv4_address: ${OLOLORDJS_NGINX_IP}
