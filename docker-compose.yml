@@ -1,0 +1,72 @@
+version: '3'
+services:
+  ololordjs-nginx:
+    image: nginx
+    environment:
+      VIRTUAL_HOST: ${VIRTUAL_HOST}
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ${VOLUME_PATH_PUBLIC}:/var/www:ro
+    networks:
+      ololordjs:
+        ipv4_address: ${OLOLORDJS_NGINX_IP}
+      ololordjs-internal:
+  ololordjs:
+    container_name: ololordjs
+    build: .
+    image: ololordjs
+    volumes:
+      - ${VOLUME_PATH_CONFIG}:/app/config.json:ro
+      - ${VOLUME_PATH_LOGS}:/app/logs:rw
+      - ${VOLUME_PATH_PUBLIC}:/app/public:rw
+      - ${VOLUME_PATH_TMP}:/app/tmp:rw
+    networks:
+      ololordjs-internal:
+        ipv4_address: 172.102.0.2
+    depends_on:
+      - ololordjs-renderer
+      - ololordjs-mongodb
+      - ololordjs-redis
+    command: ./wait-for-it.sh ololordjs-mongodb:27017 && ./wait-for-it.sh ololordjs-redis:6379 && npm run start
+  ololordjs-renderer:
+    image: ololordjs
+    volumes:
+      - ${VOLUME_PATH_CONFIG}:/app/config.json:ro
+      - ${VOLUME_PATH_LOGS}:/app/logs:rw
+      - ${VOLUME_PATH_PUBLIC}:/app/public:rw
+      - ${VOLUME_PATH_TMP}:/app/tmp:rw
+    networks:
+      - ololordjs-internal
+    depends_on:
+      - ololordjs-mongodb
+      - ololordjs-redis
+    command: ./wait-for-it.sh ololordjs-mongodb:27017 && ./wait-for-it.sh ololordjs-redis:6379 && npm run start-renderer
+  ololordjs-mongodb:
+    image: 'mongo:latest'
+    volumes:
+      - ${VOLUME_PATH_MONGODB}:/data/db
+    networks:
+      ololordjs-internal:
+        ipv4_address: 172.102.0.11
+  ololordjs-redis:
+    image: 'redis:alpine'
+    volumes:
+      - ${VOLUME_PATH_REDIS}:/data
+    networks:
+      ololordjs-internal:
+        ipv4_address: 172.102.0.12
+    command: redis-server --appendonly yes
+networks:
+  ololordjs:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        -
+          subnet: ${OLOLORDJS_SUBNET}
+  ololordjs-internal:
+    ipam:
+      driver: default
+      config:
+        -
+          subnet: 172.102.0.0/24
