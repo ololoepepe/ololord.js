@@ -23,7 +23,7 @@ services:
       - ${VOLUME_PATH_TMP}:/app/tmp:rw
     networks:
       ololordjs-internal:
-        ipv4_address: 172.102.0.2
+        ipv4_address: 172.102.0.10
     depends_on:
       - ololordjs-renderer
       - ololordjs-mongodb
