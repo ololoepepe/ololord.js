@@ -4,6 +4,8 @@ services:
     image: nginx
     environment:
       VIRTUAL_HOST: ${VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${VIRTUAL_HOST}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
     volumes:
       - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
       - ${VOLUME_PATH_PUBLIC}:/var/www:ro
