@@ -13,6 +13,8 @@ services:
       ololordjs:
         ipv4_address: ${OLOLORDJS_NGINX_IP}
       ololordjs-internal:
+    depends_on:
+      - ololordjs
   ololordjs:
     build: .
     image: ololordjs
