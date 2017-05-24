@@ -5,9 +5,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var process = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(info, conversionFunction, regexps) {
+  var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(info, conversionFunction, regexps) {
     var f = function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+      var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
         var options, start, end, txt, ntxt;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -114,16 +114,16 @@ var process = function () {
       }));
 
       return function f() {
-        return ref.apply(this, arguments);
+        return _ref4.apply(this, arguments);
       };
     }();
 
-    var _ref2 = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
+    var _ref3 = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {},
+        nestable = _ref3.nestable,
+        escapable = _ref3.escapable,
+        pre = _ref3.pre,
+        check = _ref3.check;
 
-    var nestable = _ref2.nestable;
-    var escapable = _ref2.escapable;
-    var pre = _ref2.pre;
-    var check = _ref2.check;
     var rxOp, rxCl, nested, matchs, matche, rerun;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -178,19 +178,19 @@ var process = function () {
     }, _callee2, this);
   }));
 
-  return function process(_x, _x2, _x3, _x4) {
-    return ref.apply(this, arguments);
+  return function process(_x, _x2, _x3) {
+    return _ref2.apply(this, arguments);
   };
 }();
 
 var markup = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(boardName, text) {
-    var _ref3 = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+  var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(boardName, text) {
+    var _ref6 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+        deletedPost = _ref6.deletedPost,
+        markupModes = _ref6.markupModes,
+        accessLevel = _ref6.accessLevel,
+        referencedPosts = _ref6.referencedPosts;
 
-    var deletedPost = _ref3.deletedPost;
-    var markupModes = _ref3.markupModes;
-    var accessLevel = _ref3.accessLevel;
-    var referencedPosts = _ref3.referencedPosts;
     var info;
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
@@ -219,7 +219,7 @@ var markup = function () {
             info = new _processingContext2.default(text, boardName, referencedPosts, deletedPost);
             _context4.next = 9;
             return Tools.series(elements, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(element) {
+              var _ref7 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(element) {
                 return regeneratorRuntime.wrap(function _callee3$(_context3) {
                   while (1) {
                     switch (_context3.prev = _context3.next) {
@@ -287,8 +287,8 @@ var markup = function () {
                 }, _callee3, this);
               }));
 
-              return function (_x10) {
-                return ref.apply(this, arguments);
+              return function (_x8) {
+                return _ref7.apply(this, arguments);
               };
             }());
 
@@ -303,8 +303,8 @@ var markup = function () {
     }, _callee4, this);
   }));
 
-  return function markup(_x6, _x7, _x8) {
-    return ref.apply(this, arguments);
+  return function markup(_x5, _x6) {
+    return _ref5.apply(this, arguments);
   };
 }();
 
@@ -332,7 +332,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 var EXTENDED_WAKABA_MARK = 'EXTENDED_WAKABA_MARK';
 var BB_CODE = 'BB_CODE';
@@ -374,14 +374,14 @@ function reloadElements() {
 reloadElements();
 
 function getIndE(_ref) {
-  var info = _ref.info;
-  var rxOp = _ref.rxOp;
-  var matchs = _ref.matchs;
-  var rxCl = _ref.rxCl;
-  var inds = _ref.inds;
-  var nestable = _ref.nestable;
-  var escapable = _ref.escapable;
-  var nested = _ref.nested;
+  var info = _ref.info,
+      rxOp = _ref.rxOp,
+      matchs = _ref.matchs,
+      rxCl = _ref.rxCl,
+      inds = _ref.inds,
+      nestable = _ref.nestable,
+      escapable = _ref.escapable,
+      nested = _ref.nested;
 
   nested.nested = false;
   if (!nestable) {

@@ -48,13 +48,13 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 var router = _express2.default.Router();
 
 router.post('/action/sendChatMessage', function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(req, res, next) {
-    var _ref, _ref$fields, _boardName, postNumber, chatNumber, text, result, message, receiver, ip;
+  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(req, res, next) {
+    var _ref2, _ref2$fields, _boardName, postNumber, chatNumber, text, result, message, receiver, ip;
 
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -65,12 +65,12 @@ router.post('/action/sendChatMessage', function () {
             return Files.parseForm(req);
 
           case 3:
-            _ref = _context.sent;
-            _ref$fields = _ref.fields;
-            _boardName = _ref$fields.boardName;
-            postNumber = _ref$fields.postNumber;
-            chatNumber = _ref$fields.chatNumber;
-            text = _ref$fields.text;
+            _ref2 = _context.sent;
+            _ref2$fields = _ref2.fields;
+            _boardName = _ref2$fields.boardName;
+            postNumber = _ref2$fields.postNumber;
+            chatNumber = _ref2$fields.chatNumber;
+            text = _ref2$fields.text;
 
             if (_board2.default.board(_boardName)) {
               _context.next = 11;
@@ -121,8 +121,7 @@ router.post('/action/sendChatMessage', function () {
 
           case 23:
             result = _context.sent;
-            message = result.message;
-            receiver = result.receiver;
+            message = result.message, receiver = result.receiver;
 
             message.type = 'in';
             ip = receiver.hashpass ? null : receiver.ip;
@@ -139,31 +138,31 @@ router.post('/action/sendChatMessage', function () {
               hashpasses: receiver.hashpass
             });
             res.json({});
-            _context.next = 35;
+            _context.next = 34;
             break;
 
-          case 32:
-            _context.prev = 32;
+          case 31:
+            _context.prev = 31;
             _context.t0 = _context['catch'](0);
 
             next(_context.t0);
 
-          case 35:
+          case 34:
           case 'end':
             return _context.stop();
         }
       }
-    }, _callee, this, [[0, 32]]);
+    }, _callee, this, [[0, 31]]);
   }));
 
   return function (_x, _x2, _x3) {
-    return ref.apply(this, arguments);
+    return _ref.apply(this, arguments);
   };
 }());
 
 router.post('/action/deleteChatMessages', function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(req, res, next) {
-    var _ref2, _ref2$fields, _boardName2, postNumber, chatNumber;
+  var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(req, res, next) {
+    var _ref4, _ref4$fields, _boardName2, postNumber, chatNumber;
 
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -174,11 +173,11 @@ router.post('/action/deleteChatMessages', function () {
             return Files.parseForm(req);
 
           case 3:
-            _ref2 = _context2.sent;
-            _ref2$fields = _ref2.fields;
-            _boardName2 = _ref2$fields.boardName;
-            postNumber = _ref2$fields.postNumber;
-            chatNumber = _ref2$fields.chatNumber;
+            _ref4 = _context2.sent;
+            _ref4$fields = _ref4.fields;
+            _boardName2 = _ref4$fields.boardName;
+            postNumber = _ref4$fields.postNumber;
+            chatNumber = _ref4$fields.chatNumber;
 
             if (_board2.default.board(_boardName2)) {
               _context2.next = 10;
@@ -250,13 +249,13 @@ router.post('/action/deleteChatMessages', function () {
   }));
 
   return function (_x4, _x5, _x6) {
-    return ref.apply(this, arguments);
+    return _ref3.apply(this, arguments);
   };
 }());
 
 router.post('/action/synchronize', function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(req, res, next) {
-    var _ref3, _ref3$fields, key, data;
+  var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(req, res, next) {
+    var _ref6, _ref6$fields, key, data;
 
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
@@ -267,10 +266,10 @@ router.post('/action/synchronize', function () {
             return Files.parseForm(req);
 
           case 3:
-            _ref3 = _context3.sent;
-            _ref3$fields = _ref3.fields;
-            key = _ref3$fields.key;
-            data = _ref3$fields.data;
+            _ref6 = _context3.sent;
+            _ref6$fields = _ref6.fields;
+            key = _ref6$fields.key;
+            data = _ref6$fields.data;
 
             if (!(!key || typeof key !== 'string')) {
               _context3.next = 9;
@@ -327,145 +326,128 @@ router.post('/action/synchronize', function () {
   }));
 
   return function (_x7, _x8, _x9) {
-    return ref.apply(this, arguments);
+    return _ref5.apply(this, arguments);
   };
 }());
 
 router.post('/action/search', function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(req, res, next) {
-    var _this = this;
+  var _ref7 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(req, res, next) {
+    var _ref8, _ref8$fields, query, _boardName3, page, phrases, model, result, maxSubjectLength, maxTextLength;
 
-    return regeneratorRuntime.wrap(function _callee5$(_context5) {
+    return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
-        switch (_context5.prev = _context5.next) {
+        switch (_context4.prev = _context4.next) {
           case 0:
-            _context5.prev = 0;
-            return _context5.delegateYield(regeneratorRuntime.mark(function _callee4() {
-              var _ref4, _ref4$fields, query, boardName, page, phrases, model, result, maxSubjectLength, maxTextLength;
+            _context4.prev = 0;
+            _context4.next = 3;
+            return Files.parseForm(req);
 
-              return regeneratorRuntime.wrap(function _callee4$(_context4) {
-                while (1) {
-                  switch (_context4.prev = _context4.next) {
-                    case 0:
-                      _context4.next = 2;
-                      return Files.parseForm(req);
+          case 3:
+            _ref8 = _context4.sent;
+            _ref8$fields = _ref8.fields;
+            query = _ref8$fields.query;
+            _boardName3 = _ref8$fields.boardName;
+            page = _ref8$fields.page;
 
-                    case 2:
-                      _ref4 = _context4.sent;
-                      _ref4$fields = _ref4.fields;
-                      query = _ref4$fields.query;
-                      boardName = _ref4$fields.boardName;
-                      page = _ref4$fields.page;
+            if (!(!query || typeof query !== 'string')) {
+              _context4.next = 10;
+              break;
+            }
 
-                      if (!(!query || typeof query !== 'string')) {
-                        _context4.next = 9;
-                        break;
-                      }
+            throw new Error(Tools.translate('Search query is empty'));
 
-                      throw new Error(Tools.translate('Search query is empty'));
+          case 10:
+            if (!(query.length > (0, _config2.default)('site.maxSearchQueryLength'))) {
+              _context4.next = 12;
+              break;
+            }
 
-                    case 9:
-                      if (!(query.length > (0, _config2.default)('site.maxSearchQueryLength'))) {
-                        _context4.next = 11;
-                        break;
-                      }
+            throw new Error(Tools.translate('Search query is too long'));
 
-                      throw new Error(Tools.translate('Search query is too long'));
+          case 12:
+            if ('*' === _boardName3) {
+              _boardName3 = '';
+            }
 
-                    case 11:
-                      if ('*' === boardName) {
-                        boardName = '';
-                      }
+            if (!(_boardName3 && !_board2.default.board(_boardName3))) {
+              _context4.next = 15;
+              break;
+            }
 
-                      if (!(boardName && !_board2.default.board(boardName))) {
-                        _context4.next = 14;
-                        break;
-                      }
+            throw new Error(Tools.translate('Invalid board'));
 
-                      throw new Error(Tools.translate('Invalid board'));
+          case 15:
+            page = Tools.option(page, 'number', 0, { test: function test(p) {
+                return p >= 0;
+              } });
+            _context4.next = 18;
+            return (0, _geolocation2.default)(req.ip);
 
-                    case 14:
-                      page = Tools.option(page, 'number', 0, { test: function test(p) {
-                          return p >= 0;
-                        } });
-                      _context4.next = 17;
-                      return (0, _geolocation2.default)(req.ip);
+          case 18:
+            req.geolocationInfo = _context4.sent;
+            _context4.next = 21;
+            return UsersModel.checkUserBan(req.ip, _boardName3, {
+              write: true,
+              geolocationInfo: req.geolocationInfo
+            });
 
-                    case 17:
-                      req.geolocationInfo = _context4.sent;
-                      _context4.next = 20;
-                      return UsersModel.checkUserBan(req.ip, boardName, {
-                        write: true,
-                        geolocationInfo: req.geolocationInfo
-                      });
+          case 21:
+            phrases = query.match(/\w+|"[^"]+"/g) || [];
+            model = {
+              searchQuery: query,
+              phrases: phrases.map(function (phrase) {
+                return phrase.replace(/(^\-|^"|"$)/g, '');
+              }),
+              searchBoard: _boardName3
+            };
+            _context4.next = 25;
+            return PostsModel.findPosts(query, _boardName3, page);
 
-                    case 20:
-                      phrases = query.match(/\w+|"[^"]+"/g) || [];
-                      model = {
-                        searchQuery: query,
-                        phrases: phrases.map(function (phrase) {
-                          return phrase.replace(/(^\-|^"|"$)/g, '');
-                        }),
-                        searchBoard: boardName
-                      };
-                      _context4.next = 24;
-                      return PostsModel.findPosts(query, boardName, page);
+          case 25:
+            result = _context4.sent;
+            maxSubjectLength = (0, _config2.default)('system.search.maxResultPostSubjectLengh');
+            maxTextLength = (0, _config2.default)('system.search.maxResultPostTextLengh');
 
-                    case 24:
-                      result = _context4.sent;
-                      maxSubjectLength = (0, _config2.default)('system.search.maxResultPostSubjectLengh');
-                      maxTextLength = (0, _config2.default)('system.search.maxResultPostTextLengh');
-
-                      model.searchResults = result.posts.map(function (post) {
-                        var text = (post.plainText || '').replace(/\r*\n+/g, ' ');
-                        if (text.length > maxTextLength) {
-                          text = text.substr(0, maxTextLength - 1) + '…';
-                        }
-                        var subject = post.subject || text;
-                        if (subject.length > maxSubjectLength) {
-                          subject = subject.substr(0, maxSubjectLength - 1) + '…';
-                        }
-                        return {
-                          boardName: post.boardName,
-                          postNumber: post.number,
-                          threadNumber: post.threadNumber,
-                          archived: post.archived,
-                          subject: subject,
-                          text: text
-                        };
-                      });
-                      model.total = result.total;
-                      model.max = result.max;
-                      res.json(model);
-
-                    case 31:
-                    case 'end':
-                      return _context4.stop();
-                  }
-                }
-              }, _callee4, _this);
-            })(), 't0', 2);
-
-          case 2:
-            _context5.next = 7;
+            model.searchResults = result.posts.map(function (post) {
+              var text = (post.plainText || '').replace(/\r*\n+/g, ' ');
+              if (text.length > maxTextLength) {
+                text = text.substr(0, maxTextLength - 1) + '…';
+              }
+              var subject = post.subject || text;
+              if (subject.length > maxSubjectLength) {
+                subject = subject.substr(0, maxSubjectLength - 1) + '…';
+              }
+              return {
+                boardName: post.boardName,
+                postNumber: post.number,
+                threadNumber: post.threadNumber,
+                archived: post.archived,
+                subject: subject,
+                text: text
+              };
+            });
+            model.total = result.total;
+            model.max = result.max;
+            res.json(model);
+            _context4.next = 37;
             break;
 
-          case 4:
-            _context5.prev = 4;
-            _context5.t1 = _context5['catch'](0);
+          case 34:
+            _context4.prev = 34;
+            _context4.t0 = _context4['catch'](0);
 
-            next(_context5.t1);
+            next(_context4.t0);
 
-          case 7:
+          case 37:
           case 'end':
-            return _context5.stop();
+            return _context4.stop();
         }
       }
-    }, _callee5, this, [[0, 4]]);
+    }, _callee4, this, [[0, 34]]);
   }));
 
   return function (_x10, _x11, _x12) {
-    return ref.apply(this, arguments);
+    return _ref7.apply(this, arguments);
   };
 }());
 

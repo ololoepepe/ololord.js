@@ -50,12 +50,12 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 var langNames = _fsWatcher2.default.createWatchedResource(__dirname + '/../../misc/lang-names.json', function (path) {
   return require(path);
 }, function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(path) {
+  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(path) {
     var data;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -78,7 +78,7 @@ var langNames = _fsWatcher2.default.createWatchedResource(__dirname + '/../../mi
   }));
 
   return function (_x) {
-    return ref.apply(this, arguments);
+    return _ref.apply(this, arguments);
   };
 }()) || {};
 
@@ -89,7 +89,7 @@ function filterNotFoundImageFileNames(fileName) {
 var notFoundImageFileNames = _fsWatcher2.default.createWatchedResource(__dirname + '/../../public/img/404', function (path) {
   return _fs4.default.readdirSync(path).filter(filterNotFoundImageFileNames);
 }, function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(path) {
+  var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(path) {
     var fileNames;
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -111,7 +111,7 @@ var notFoundImageFileNames = _fsWatcher2.default.createWatchedResource(__dirname
   }));
 
   return function (_x2) {
-    return ref.apply(this, arguments);
+    return _ref2.apply(this, arguments);
   };
 }()) || [];
 
@@ -187,15 +187,13 @@ function boards() {
     return group;
   });
   if (addDefault || boardGroups.length < 1) {
-    (function () {
-      var noGroups = boardGroups.length < 1;
-      boardGroups.push({
-        name: '',
-        boards: boards.filter(function (board) {
-          return noGroups || !board.hidden && !board.groupName;
-        })
-      });
-    })();
+    var noGroups = boardGroups.length < 1;
+    boardGroups.push({
+      name: '',
+      boards: boards.filter(function (board) {
+        return noGroups || !board.hidden && !board.groupName;
+      })
+    });
   }
   boardGroups = boardGroups.filter(function (group) {
     return group.boards.length > 0;

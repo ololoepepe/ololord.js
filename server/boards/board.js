@@ -4,8 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _underscore = require('underscore');
@@ -36,7 +34,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -140,18 +138,12 @@ var Board = function () {
           if ('#include all' === rule) {
             return common;
           } else if (RX_EXCEPT.test(rule)) {
-            var _ret = function () {
-              var excluded = rule.match(RX_EXCEPT)[2].split(',').map(function (n) {
-                return +n;
-              });
-              return {
-                v: common.filter(function (_, i) {
-                  return excluded.indexOf(i) < 0;
-                })
-              };
-            }();
-
-            if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+            var excluded = rule.match(RX_EXCEPT)[2].split(',').map(function (n) {
+              return +n;
+            });
+            return common.filter(function (_, i) {
+              return excluded.indexOf(i) < 0;
+            });
           } else if (RX_SEVERAL.test(rule)) {
             return rule.match(RX_SEVERAL)[1].split(',').map(function (n) {
               return +n;
@@ -191,11 +183,10 @@ var Board = function () {
   }]);
 
   function Board(name, title) {
-    var _ref = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-    var defaultPriority = _ref.defaultPriority;
-    var defaultUserName = _ref.defaultUserName;
-    var defaultGroupName = _ref.defaultGroupName;
+    var _ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+        defaultPriority = _ref.defaultPriority,
+        defaultUserName = _ref.defaultUserName,
+        defaultGroupName = _ref.defaultGroupName;
 
     _classCallCheck(this, Board);
 
@@ -346,23 +337,20 @@ var Board = function () {
   }, {
     key: 'testParameters',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(_ref2) {
+      var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee(_ref3) {
         var _this3 = this;
 
-        var req = _ref2.req;
-        var mode = _ref2.mode;
-        var fields = _ref2.fields;
-        var files = _ref2.files;
-        var existingFileCount = _ref2.existingFileCount;
+        var req = _ref3.req,
+            mode = _ref3.mode,
+            fields = _ref3.fields,
+            files = _ref3.files,
+            existingFileCount = _ref3.existingFileCount;
         var name, subject, text, password, err;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                name = fields.name;
-                subject = fields.subject;
-                text = fields.text;
-                password = fields.password;
+                name = fields.name, subject = fields.subject, text = fields.text, password = fields.password;
 
                 name = name || '';
                 subject = subject || '';
@@ -370,73 +358,73 @@ var Board = function () {
                 password = password || '';
 
                 if (!(name.length > this.maxNameLength)) {
-                  _context.next = 10;
+                  _context.next = 7;
                   break;
                 }
 
                 throw new Error(Tools.translate('Name is too long'));
 
-              case 10:
+              case 7:
                 if (!(subject.length > this.maxSubjectLength)) {
-                  _context.next = 12;
+                  _context.next = 9;
                   break;
                 }
 
                 throw new Error(Tools.translate('Subject is too long'));
 
-              case 12:
+              case 9:
                 if (!(text.length > this.maxTextLength)) {
-                  _context.next = 14;
+                  _context.next = 11;
                   break;
                 }
 
                 throw new Error(Tools.translate('Comment is too long'));
 
-              case 14:
+              case 11:
                 if (!(password.length > this.maxPasswordLength)) {
-                  _context.next = 16;
+                  _context.next = 13;
                   break;
                 }
 
                 throw new Error(Tools.translate('Password is too long'));
 
-              case 16:
+              case 13:
                 if (!('markupText' === mode || 'editPost' === mode)) {
-                  _context.next = 18;
+                  _context.next = 15;
                   break;
                 }
 
                 return _context.abrupt('return');
 
-              case 18:
+              case 15:
                 if (!('createThread' === mode && this.maxFileCount && files.length <= 0)) {
-                  _context.next = 20;
+                  _context.next = 17;
                   break;
                 }
 
                 throw new Error(Tools.translate('Attempt to create a thread without attaching a file'));
 
-              case 20:
+              case 17:
                 if ('deleteFile' === mode && existingFileCount > 0) {
                   --existingFileCount;
                 }
 
                 if (!(text.length <= 0 && files.length + existingFileCount <= 0)) {
-                  _context.next = 23;
+                  _context.next = 20;
                   break;
                 }
 
                 throw new Error(Tools.translate('Both file and comment are missing'));
 
-              case 23:
+              case 20:
                 if (!(files.length + existingFileCount > this.maxFileCount)) {
-                  _context.next = 25;
+                  _context.next = 22;
                   break;
                 }
 
                 throw new Error(Tools.translate('Too many files'));
 
-              case 25:
+              case 22:
                 err = files.reduce(function (err, file) {
                   if (err) {
                     return err;
@@ -450,13 +438,13 @@ var Board = function () {
                 }, '');
 
                 if (!err) {
-                  _context.next = 28;
+                  _context.next = 25;
                   break;
                 }
 
                 throw err;
 
-              case 28:
+              case 25:
               case 'end':
                 return _context.stop();
             }
@@ -465,7 +453,7 @@ var Board = function () {
       }));
 
       function testParameters(_x2) {
-        return ref.apply(this, arguments);
+        return _ref2.apply(this, arguments);
       }
 
       return testParameters;
@@ -473,7 +461,7 @@ var Board = function () {
   }, {
     key: 'getPostExtraData',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(req, fields, files) {
+      var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(req, fields, files) {
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
@@ -489,7 +477,7 @@ var Board = function () {
       }));
 
       function getPostExtraData(_x3, _x4, _x5) {
-        return ref.apply(this, arguments);
+        return _ref4.apply(this, arguments);
       }
 
       return getPostExtraData;
@@ -497,7 +485,7 @@ var Board = function () {
   }, {
     key: 'editPostExtraData',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(req, fields, extraData) {
+      var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(req, fields, extraData) {
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
@@ -513,7 +501,7 @@ var Board = function () {
       }));
 
       function editPostExtraData(_x6, _x7, _x8) {
-        return ref.apply(this, arguments);
+        return _ref5.apply(this, arguments);
       }
 
       return editPostExtraData;
@@ -521,7 +509,7 @@ var Board = function () {
   }, {
     key: 'transformPostExtraData',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(extraData, sourceBoard) {
+      var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(extraData, sourceBoard) {
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
@@ -537,7 +525,7 @@ var Board = function () {
       }));
 
       function transformPostExtraData(_x9, _x10) {
-        return ref.apply(this, arguments);
+        return _ref6.apply(this, arguments);
       }
 
       return transformPostExtraData;
@@ -545,7 +533,7 @@ var Board = function () {
   }, {
     key: 'renderPost',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(post) {
+      var _ref7 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(post) {
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
@@ -578,7 +566,7 @@ var Board = function () {
       }));
 
       function renderPost(_x11) {
-        return ref.apply(this, arguments);
+        return _ref7.apply(this, arguments);
       }
 
       return renderPost;

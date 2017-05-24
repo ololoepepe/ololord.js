@@ -24,7 +24,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 var excludePaths = {};
 var excludeRules = [];
@@ -51,8 +51,8 @@ function exclude(path) {
 }
 
 exports.default = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(req, res, next) {
-    var args, _ref, fields, files;
+  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(req, res, next) {
+    var args, _ref2, fields, files;
 
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -77,9 +77,9 @@ exports.default = function () {
             return Files.parseForm(req);
 
           case 7:
-            _ref = _context.sent;
-            fields = _ref.fields;
-            files = _ref.files;
+            _ref2 = _context.sent;
+            fields = _ref2.fields;
+            files = _ref2.files;
 
             req.formFields = fields;
             req.formFiles = files;
@@ -130,7 +130,7 @@ exports.default = function () {
   }));
 
   return function (_x, _x2, _x3) {
-    return ref.apply(this, arguments);
+    return _ref.apply(this, arguments);
   };
 }();
 //# sourceMappingURL=log.js.map

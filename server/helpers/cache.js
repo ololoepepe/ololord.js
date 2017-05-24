@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.removeFile = exports.writeFile = exports.readFile = undefined;
 
 var readFile = exports.readFile = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(fileName) {
+  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(fileName) {
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -26,12 +26,12 @@ var readFile = exports.readFile = function () {
   }));
 
   return function readFile(_x) {
-    return ref.apply(this, arguments);
+    return _ref.apply(this, arguments);
   };
 }();
 
 var writeFile = exports.writeFile = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(fileName, data) {
+  var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(fileName, data) {
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -51,12 +51,12 @@ var writeFile = exports.writeFile = function () {
   }));
 
   return function writeFile(_x2, _x3) {
-    return ref.apply(this, arguments);
+    return _ref2.apply(this, arguments);
   };
 }();
 
 var removeFile = exports.removeFile = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(fileName) {
+  var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(fileName) {
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -76,7 +76,7 @@ var removeFile = exports.removeFile = function () {
   }));
 
   return function removeFile(_x4) {
-    return ref.apply(this, arguments);
+    return _ref3.apply(this, arguments);
   };
 }();
 
@@ -92,7 +92,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 var ROOT_PATH = __dirname + '/../../public';
 //# sourceMappingURL=cache.js.map

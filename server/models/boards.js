@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.delall = exports.initialize = exports.nextPostNumber = exports.getPageCount = exports.getLastPostNumbers = exports.getLastPostNumber = exports.getArchive = exports.getCatalog = exports.getPage = exports.getThread = undefined;
 
 var getThread = exports.getThread = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(boardName, threadNumber) {
+  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(boardName, threadNumber) {
     var board, thread, posts;
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
@@ -58,12 +58,12 @@ var getThread = exports.getThread = function () {
   }));
 
   return function getThread(_x, _x2) {
-    return ref.apply(this, arguments);
+    return _ref.apply(this, arguments);
   };
 }();
 
 var getPage = exports.getPage = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, pageNumber) {
+  var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(boardName, pageNumber) {
     var board, pageCount, threads, Post, lastPostNumber;
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
@@ -108,7 +108,7 @@ var getPage = exports.getPage = function () {
             Post = _context3.sent;
             _context3.next = 15;
             return Tools.series(threads, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(thread) {
+              var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(thread) {
                 return regeneratorRuntime.wrap(function _callee2$(_context2) {
                   while (1) {
                     switch (_context2.prev = _context2.next) {
@@ -153,7 +153,7 @@ var getPage = exports.getPage = function () {
               }));
 
               return function (_x5) {
-                return ref.apply(this, arguments);
+                return _ref3.apply(this, arguments);
               };
             }());
 
@@ -183,12 +183,12 @@ var getPage = exports.getPage = function () {
   }));
 
   return function getPage(_x3, _x4) {
-    return ref.apply(this, arguments);
+    return _ref2.apply(this, arguments);
   };
 }();
 
 var getCatalog = exports.getCatalog = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(boardName, sortMode) {
+  var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(boardName, sortMode) {
     var board, threads, Post, sortFunction, lastPostNumber;
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
@@ -216,7 +216,7 @@ var getCatalog = exports.getCatalog = function () {
             Post = _context5.sent;
             _context5.next = 11;
             return Tools.series(threads, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(thread) {
+              var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(thread) {
                 return regeneratorRuntime.wrap(function _callee4$(_context4) {
                   while (1) {
                     switch (_context4.prev = _context4.next) {
@@ -246,7 +246,7 @@ var getCatalog = exports.getCatalog = function () {
               }));
 
               return function (_x8) {
-                return ref.apply(this, arguments);
+                return _ref5.apply(this, arguments);
               };
             }());
 
@@ -288,12 +288,12 @@ var getCatalog = exports.getCatalog = function () {
   }));
 
   return function getCatalog(_x6, _x7) {
-    return ref.apply(this, arguments);
+    return _ref4.apply(this, arguments);
   };
 }();
 
 var getArchive = exports.getArchive = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(boardName) {
+  var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(boardName) {
     var board, threads, Post, lastPostNumber;
     return regeneratorRuntime.wrap(function _callee7$(_context7) {
       while (1) {
@@ -323,7 +323,7 @@ var getArchive = exports.getArchive = function () {
             Post = _context7.sent;
             _context7.next = 12;
             return Tools.series(threads, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(thread) {
+              var _ref7 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(thread) {
                 return regeneratorRuntime.wrap(function _callee6$(_context6) {
                   while (1) {
                     switch (_context6.prev = _context6.next) {
@@ -345,7 +345,7 @@ var getArchive = exports.getArchive = function () {
               }));
 
               return function (_x10) {
-                return ref.apply(this, arguments);
+                return _ref7.apply(this, arguments);
               };
             }());
 
@@ -370,12 +370,12 @@ var getArchive = exports.getArchive = function () {
   }));
 
   return function getArchive(_x9) {
-    return ref.apply(this, arguments);
+    return _ref6.apply(this, arguments);
   };
 }();
 
 var getLastPostNumber = exports.getLastPostNumber = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(boardName) {
+  var _ref8 = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(boardName) {
     var PostCounter, result;
     return regeneratorRuntime.wrap(function _callee8$(_context8) {
       while (1) {
@@ -410,12 +410,12 @@ var getLastPostNumber = exports.getLastPostNumber = function () {
   }));
 
   return function getLastPostNumber(_x11) {
-    return ref.apply(this, arguments);
+    return _ref8.apply(this, arguments);
   };
 }();
 
 var getLastPostNumbers = exports.getLastPostNumbers = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(boardNames) {
+  var _ref9 = _asyncToGenerator(regeneratorRuntime.mark(function _callee9(boardNames) {
     var PostCounter, query, result;
     return regeneratorRuntime.wrap(function _callee9$(_context9) {
       while (1) {
@@ -448,9 +448,9 @@ var getLastPostNumbers = exports.getLastPostNumbers = function () {
 
           case 9:
             result = _context9.sent;
-            return _context9.abrupt('return', result.reduce(function (acc, _ref) {
-              var _id = _ref._id;
-              var lastPostNumber = _ref.lastPostNumber;
+            return _context9.abrupt('return', result.reduce(function (acc, _ref10) {
+              var _id = _ref10._id,
+                  lastPostNumber = _ref10.lastPostNumber;
 
               acc[_id] = lastPostNumber;
               return acc;
@@ -465,12 +465,12 @@ var getLastPostNumbers = exports.getLastPostNumbers = function () {
   }));
 
   return function getLastPostNumbers(_x12) {
-    return ref.apply(this, arguments);
+    return _ref9.apply(this, arguments);
   };
 }();
 
 var getPageCount = exports.getPageCount = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(boardName) {
+  var _ref11 = _asyncToGenerator(regeneratorRuntime.mark(function _callee10(boardName) {
     var board, Thread, threadCount, pageCount;
     return regeneratorRuntime.wrap(function _callee10$(_context10) {
       while (1) {
@@ -510,12 +510,12 @@ var getPageCount = exports.getPageCount = function () {
   }));
 
   return function getPageCount(_x13) {
-    return ref.apply(this, arguments);
+    return _ref11.apply(this, arguments);
   };
 }();
 
 var nextPostNumber = exports.nextPostNumber = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(boardName, incrementBy) {
+  var _ref12 = _asyncToGenerator(regeneratorRuntime.mark(function _callee11(boardName, incrementBy) {
     var board, PostCounter, result, lastPostNumber;
     return regeneratorRuntime.wrap(function _callee11$(_context11) {
       while (1) {
@@ -585,19 +585,19 @@ var nextPostNumber = exports.nextPostNumber = function () {
   }));
 
   return function nextPostNumber(_x14, _x15) {
-    return ref.apply(this, arguments);
+    return _ref12.apply(this, arguments);
   };
 }();
 
 var initialize = exports.initialize = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee13() {
+  var _ref13 = _asyncToGenerator(regeneratorRuntime.mark(function _callee13() {
     return regeneratorRuntime.wrap(function _callee13$(_context13) {
       while (1) {
         switch (_context13.prev = _context13.next) {
           case 0:
             _context13.next = 2;
             return Tools.series(_board2.default.boardNames(), function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(boardName) {
+              var _ref14 = _asyncToGenerator(regeneratorRuntime.mark(function _callee12(boardName) {
                 return regeneratorRuntime.wrap(function _callee12$(_context12) {
                   while (1) {
                     switch (_context12.prev = _context12.next) {
@@ -614,7 +614,7 @@ var initialize = exports.initialize = function () {
               }));
 
               return function (_x16) {
-                return ref.apply(this, arguments);
+                return _ref14.apply(this, arguments);
               };
             }());
 
@@ -631,12 +631,12 @@ var initialize = exports.initialize = function () {
   }));
 
   return function initialize() {
-    return ref.apply(this, arguments);
+    return _ref13.apply(this, arguments);
   };
 }();
 
 var delall = exports.delall = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(req, ip, boardNames) {
+  var _ref15 = _asyncToGenerator(regeneratorRuntime.mark(function _callee19(req, ip, boardNames) {
     var deletedThreads, updatedThreads, deletedPosts, Post;
     return regeneratorRuntime.wrap(function _callee19$(_context19) {
       while (1) {
@@ -662,7 +662,7 @@ var delall = exports.delall = function () {
             Post = _context19.sent;
             _context19.next = 11;
             return Tools.series(boardNames, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(boardName) {
+              var _ref16 = _asyncToGenerator(regeneratorRuntime.mark(function _callee14(boardName) {
                 var posts;
                 return regeneratorRuntime.wrap(function _callee14$(_context14) {
                   while (1) {
@@ -711,14 +711,14 @@ var delall = exports.delall = function () {
               }));
 
               return function (_x20) {
-                return ref.apply(this, arguments);
+                return _ref16.apply(this, arguments);
               };
             }());
 
           case 11:
             _context19.next = 13;
             return Tools.series(deletedPosts, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(post) {
+              var _ref17 = _asyncToGenerator(regeneratorRuntime.mark(function _callee15(post) {
                 return regeneratorRuntime.wrap(function _callee15$(_context15) {
                   while (1) {
                     switch (_context15.prev = _context15.next) {
@@ -738,14 +738,14 @@ var delall = exports.delall = function () {
               }));
 
               return function (_x21) {
-                return ref.apply(this, arguments);
+                return _ref17.apply(this, arguments);
               };
             }());
 
           case 13:
             _context19.next = 15;
             return Tools.series(deletedThreads, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(thread) {
+              var _ref18 = _asyncToGenerator(regeneratorRuntime.mark(function _callee16(thread) {
                 return regeneratorRuntime.wrap(function _callee16$(_context16) {
                   while (1) {
                     switch (_context16.prev = _context16.next) {
@@ -762,14 +762,14 @@ var delall = exports.delall = function () {
               }));
 
               return function (_x22) {
-                return ref.apply(this, arguments);
+                return _ref18.apply(this, arguments);
               };
             }());
 
           case 15:
             _context19.next = 17;
             return Tools.series(updatedThreads, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(thread) {
+              var _ref19 = _asyncToGenerator(regeneratorRuntime.mark(function _callee17(thread) {
                 return regeneratorRuntime.wrap(function _callee17$(_context17) {
                   while (1) {
                     switch (_context17.prev = _context17.next) {
@@ -786,14 +786,14 @@ var delall = exports.delall = function () {
               }));
 
               return function (_x23) {
-                return ref.apply(this, arguments);
+                return _ref19.apply(this, arguments);
               };
             }());
 
           case 17:
             _context19.next = 19;
             return Tools.series(deletedThreads, function () {
-              var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(thread) {
+              var _ref20 = _asyncToGenerator(regeneratorRuntime.mark(function _callee18(thread) {
                 return regeneratorRuntime.wrap(function _callee18$(_context18) {
                   while (1) {
                     switch (_context18.prev = _context18.next) {
@@ -810,7 +810,7 @@ var delall = exports.delall = function () {
               }));
 
               return function (_x24) {
-                return ref.apply(this, arguments);
+                return _ref20.apply(this, arguments);
               };
             }());
 
@@ -823,7 +823,7 @@ var delall = exports.delall = function () {
   }));
 
   return function delall(_x17, _x18, _x19) {
-    return ref.apply(this, arguments);
+    return _ref15.apply(this, arguments);
   };
 }();
 
@@ -865,7 +865,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 var client = (0, _mongodbClientFactory2.default)();
 var pageCounts = new Map();

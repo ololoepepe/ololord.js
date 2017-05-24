@@ -95,6 +95,7 @@ function buildJS(custom, debug) {
   if (!custom || fs.existsSync(`${__dirname}/src/public/js/custom/index.js`)) {
     var stream = browserify({
       entries: (custom ? './src/public/js/custom/index.js' : './src/public/js/index.js'),
+      noParse: [require.resolve('xregexp')],
       debug: true
     });
     if (custom) {

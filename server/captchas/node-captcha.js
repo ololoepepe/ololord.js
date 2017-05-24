@@ -9,7 +9,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var getNodeCaptchaImage = function () {
-  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(_1, res) {
+  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(_1, res) {
     var _this = this;
 
     return regeneratorRuntime.wrap(function _callee$(_context) {
@@ -58,7 +58,7 @@ var getNodeCaptchaImage = function () {
   }));
 
   return function getNodeCaptchaImage(_x, _x2) {
-    return ref.apply(this, arguments);
+    return _ref.apply(this, arguments);
   };
 }();
 
@@ -100,7 +100,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 var CAPTCHA_PATH = __dirname + '/../../public/node-captcha';
 
@@ -110,7 +110,7 @@ var NodeCaptcha = function (_Captcha) {
   _createClass(NodeCaptcha, null, [{
     key: 'removeOldCaptchImages',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
+      var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
         var fileNames;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
@@ -124,16 +124,14 @@ var NodeCaptcha = function (_Captcha) {
                 fileNames = _context3.sent;
                 _context3.next = 6;
                 return Tools.series(fileNames.filter(function (fileName) {
-                  var _fileName$split = fileName.split('.');
-
-                  var _fileName$split2 = _slicedToArray(_fileName$split, 2);
-
-                  var name = _fileName$split2[0];
-                  var suffix = _fileName$split2[1];
+                  var _fileName$split = fileName.split('.'),
+                      _fileName$split2 = _slicedToArray(_fileName$split, 2),
+                      name = _fileName$split2[0],
+                      suffix = _fileName$split2[1];
 
                   return 'png' === suffix && /^[0-9]+$/.test(name);
                 }), function () {
-                  var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(fileName) {
+                  var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(fileName) {
                     return regeneratorRuntime.wrap(function _callee2$(_context2) {
                       while (1) {
                         switch (_context2.prev = _context2.next) {
@@ -153,7 +151,7 @@ var NodeCaptcha = function (_Captcha) {
                   }));
 
                   return function (_x3) {
-                    return ref.apply(this, arguments);
+                    return _ref3.apply(this, arguments);
                   };
                 }());
 
@@ -176,7 +174,7 @@ var NodeCaptcha = function (_Captcha) {
       }));
 
       function removeOldCaptchImages() {
-        return ref.apply(this, arguments);
+        return _ref2.apply(this, arguments);
       }
 
       return removeOldCaptchImages;
@@ -186,7 +184,7 @@ var NodeCaptcha = function (_Captcha) {
   function NodeCaptcha() {
     _classCallCheck(this, NodeCaptcha);
 
-    var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(NodeCaptcha).call(this, Tools.NODE_CAPTCHA_ID, Tools.translate.noop('Node captcha')));
+    var _this2 = _possibleConstructorReturn(this, (NodeCaptcha.__proto__ || Object.getPrototypeOf(NodeCaptcha)).call(this, Tools.NODE_CAPTCHA_ID, Tools.translate.noop('Node captcha')));
 
     _this2.challenges = new Map();
     _this2.defineSetting('size', 6);
@@ -215,9 +213,9 @@ var NodeCaptcha = function (_Captcha) {
   }, {
     key: 'checkCaptcha',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(_1, _ref) {
-        var nodeCaptchaChallenge = _ref.nodeCaptchaChallenge;
-        var nodeCaptchaResponse = _ref.nodeCaptchaResponse;
+      var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(_1, _ref5) {
+        var nodeCaptchaChallenge = _ref5.nodeCaptchaChallenge,
+            nodeCaptchaResponse = _ref5.nodeCaptchaResponse;
         var challengeID, response, challenge;
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
@@ -274,7 +272,7 @@ var NodeCaptcha = function (_Captcha) {
       }));
 
       function checkCaptcha(_x4, _x5) {
-        return ref.apply(this, arguments);
+        return _ref4.apply(this, arguments);
       }
 
       return checkCaptcha;

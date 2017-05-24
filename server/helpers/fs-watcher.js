@@ -18,7 +18,7 @@ var _fs4 = _interopRequireDefault(_fs3);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -82,7 +82,7 @@ var FSWatcher = function (_EventEmitter) {
   function FSWatcher(fileName) {
     _classCallCheck(this, FSWatcher);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(FSWatcher).call(this));
+    var _this = _possibleConstructorReturn(this, (FSWatcher.__proto__ || Object.getPrototypeOf(FSWatcher)).call(this));
 
     _this.fileName = fileName;
     _this.resetWatcher();
@@ -92,7 +92,7 @@ var FSWatcher = function (_EventEmitter) {
   _createClass(FSWatcher, [{
     key: 'resetWatcher',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
+      var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
         var _this2 = this;
 
         var exists;
@@ -139,7 +139,7 @@ var FSWatcher = function (_EventEmitter) {
       }));
 
       function resetWatcher() {
-        return ref.apply(this, arguments);
+        return _ref2.apply(this, arguments);
       }
 
       return resetWatcher;

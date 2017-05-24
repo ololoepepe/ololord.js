@@ -18,7 +18,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { return step("next", value); }, function (err) { return step("throw", err); }); } } return step("next"); }); }; }
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -30,7 +30,7 @@ var UnorderedSet = function (_CommonKey) {
   _inherits(UnorderedSet, _CommonKey);
 
   function UnorderedSet() {
-    var _Object$getPrototypeO;
+    var _ref;
 
     _classCallCheck(this, UnorderedSet);
 
@@ -38,13 +38,13 @@ var UnorderedSet = function (_CommonKey) {
       args[_key] = arguments[_key];
     }
 
-    return _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(UnorderedSet)).call.apply(_Object$getPrototypeO, [this].concat(args)));
+    return _possibleConstructorReturn(this, (_ref = UnorderedSet.__proto__ || Object.getPrototypeOf(UnorderedSet)).call.apply(_ref, [this].concat(args)));
   }
 
   _createClass(UnorderedSet, [{
     key: 'getOne',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(subkey) {
+      var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee(subkey) {
         var data;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -66,7 +66,7 @@ var UnorderedSet = function (_CommonKey) {
       }));
 
       function getOne(_x) {
-        return ref.apply(this, arguments);
+        return _ref2.apply(this, arguments);
       }
 
       return getOne;
@@ -74,7 +74,7 @@ var UnorderedSet = function (_CommonKey) {
   }, {
     key: 'getAll',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(subkey) {
+      var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(subkey) {
         var data;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
@@ -96,7 +96,7 @@ var UnorderedSet = function (_CommonKey) {
       }));
 
       function getAll(_x2) {
-        return ref.apply(this, arguments);
+        return _ref3.apply(this, arguments);
       }
 
       return getAll;
@@ -104,7 +104,7 @@ var UnorderedSet = function (_CommonKey) {
   }, {
     key: 'contains',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(data, subkey) {
+      var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(data, subkey) {
         var contains;
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
@@ -126,7 +126,7 @@ var UnorderedSet = function (_CommonKey) {
       }));
 
       function contains(_x3, _x4) {
-        return ref.apply(this, arguments);
+        return _ref4.apply(this, arguments);
       }
 
       return contains;
@@ -134,7 +134,7 @@ var UnorderedSet = function (_CommonKey) {
   }, {
     key: 'addOne',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(data, subkey) {
+      var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(data, subkey) {
         return regeneratorRuntime.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
@@ -154,7 +154,7 @@ var UnorderedSet = function (_CommonKey) {
       }));
 
       function addOne(_x5, _x6) {
-        return ref.apply(this, arguments);
+        return _ref5.apply(this, arguments);
       }
 
       return addOne;
@@ -162,7 +162,7 @@ var UnorderedSet = function (_CommonKey) {
   }, {
     key: 'addSome',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(list, subkey) {
+      var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(list, subkey) {
         var _client$sadd;
 
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
@@ -192,7 +192,7 @@ var UnorderedSet = function (_CommonKey) {
       }));
 
       function addSome(_x7, _x8) {
-        return ref.apply(this, arguments);
+        return _ref6.apply(this, arguments);
       }
 
       return addSome;
@@ -200,7 +200,7 @@ var UnorderedSet = function (_CommonKey) {
   }, {
     key: 'deleteOne',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(data, subkey) {
+      var _ref7 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(data, subkey) {
         return regeneratorRuntime.wrap(function _callee6$(_context6) {
           while (1) {
             switch (_context6.prev = _context6.next) {
@@ -220,7 +220,7 @@ var UnorderedSet = function (_CommonKey) {
       }));
 
       function deleteOne(_x9, _x10) {
-        return ref.apply(this, arguments);
+        return _ref7.apply(this, arguments);
       }
 
       return deleteOne;
@@ -228,7 +228,7 @@ var UnorderedSet = function (_CommonKey) {
   }, {
     key: 'deleteSome',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(list, subkey) {
+      var _ref8 = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(list, subkey) {
         var _client$srem;
 
         return regeneratorRuntime.wrap(function _callee7$(_context7) {
@@ -258,7 +258,7 @@ var UnorderedSet = function (_CommonKey) {
       }));
 
       function deleteSome(_x11, _x12) {
-        return ref.apply(this, arguments);
+        return _ref8.apply(this, arguments);
       }
 
       return deleteSome;
@@ -266,7 +266,7 @@ var UnorderedSet = function (_CommonKey) {
   }, {
     key: 'count',
     value: function () {
-      var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(subkey) {
+      var _ref9 = _asyncToGenerator(regeneratorRuntime.mark(function _callee8(subkey) {
         return regeneratorRuntime.wrap(function _callee8$(_context8) {
           while (1) {
             switch (_context8.prev = _context8.next) {
@@ -286,7 +286,7 @@ var UnorderedSet = function (_CommonKey) {
       }));
 
       function count(_x13) {
-        return ref.apply(this, arguments);
+        return _ref9.apply(this, arguments);
       }
 
       return count;
