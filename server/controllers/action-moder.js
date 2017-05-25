@@ -28,10 +28,6 @@ var _files = require('../core/files');
 
 var Files = _interopRequireWildcard(_files);
 
-var _geolocation = require('../core/geolocation');
-
-var _geolocation2 = _interopRequireDefault(_geolocation);
-
 var _postCreationTransaction = require('../helpers/post-creation-transaction');
 
 var _postCreationTransaction2 = _interopRequireDefault(_postCreationTransaction);
@@ -243,7 +239,7 @@ router.post('/action/banUser', function () {
 
 router.post('/action/delall', function () {
   var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(req, res, next) {
-    var _ref4, fields, userIp, boardNames, geolocationInfo;
+    var _ref4, fields, userIp, boardNames;
 
     return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
@@ -307,37 +303,29 @@ router.post('/action/delall', function () {
               }
             });
             _context2.next = 19;
-            return (0, _geolocation2.default)(req.ip);
+            return UsersModel.checkUserBan(req.ip, boardNames, { write: true });
 
           case 19:
-            geolocationInfo = _context2.sent;
-            _context2.next = 22;
-            return UsersModel.checkUserBan(req.ip, boardNames, {
-              write: true,
-              geolocationInfo: geolocationInfo
-            });
-
-          case 22:
-            _context2.next = 24;
+            _context2.next = 21;
             return BoardsModel.delall(req, userIp, boardNames);
 
-          case 24:
+          case 21:
             res.json({});
-            _context2.next = 30;
+            _context2.next = 27;
             break;
 
-          case 27:
-            _context2.prev = 27;
+          case 24:
+            _context2.prev = 24;
             _context2.t0 = _context2['catch'](0);
 
             next(_context2.t0);
 
-          case 30:
+          case 27:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee2, this, [[0, 27]]);
+    }, _callee2, this, [[0, 24]]);
   }));
 
   return function (_x4, _x5, _x6) {
@@ -347,7 +335,7 @@ router.post('/action/delall', function () {
 
 router.post('/action/moveThread', function () {
   var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(req, res, next) {
-    var transaction, _ref6, fields, boardName, threadNumber, targetBoardName, password, geolocationInfo, result;
+    var transaction, _ref6, fields, boardName, threadNumber, targetBoardName, password, result;
 
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
@@ -398,34 +386,26 @@ router.post('/action/moveThread', function () {
 
           case 16:
             _context3.next = 18;
-            return (0, _geolocation2.default)(req.ip);
+            return UsersModel.checkUserBan(req.ip, [boardName, targetBoardName], { write: true });
 
           case 18:
-            geolocationInfo = _context3.sent;
-            _context3.next = 21;
-            return UsersModel.checkUserBan(req.ip, [boardName, targetBoardName], {
-              write: true,
-              geolocationInfo: geolocationInfo
-            });
-
-          case 21:
-            _context3.next = 23;
+            _context3.next = 20;
             return UsersModel.checkUserPermissions(req, boardName, threadNumber, 'moveThread', Tools.sha1(password));
 
-          case 23:
+          case 20:
             transaction = new _postCreationTransaction2.default(boardName);
-            _context3.next = 26;
+            _context3.next = 23;
             return ThreadsModel.moveThread(boardName, threadNumber, targetBoardName, transaction);
 
-          case 26:
+          case 23:
             result = _context3.sent;
 
             res.json(result);
-            _context3.next = 34;
+            _context3.next = 31;
             break;
 
-          case 30:
-            _context3.prev = 30;
+          case 27:
+            _context3.prev = 27;
             _context3.t0 = _context3['catch'](1);
 
             if (transaction) {
@@ -433,12 +413,12 @@ router.post('/action/moveThread', function () {
             }
             next(_context3.t0);
 
-          case 34:
+          case 31:
           case 'end':
             return _context3.stop();
         }
       }
-    }, _callee3, this, [[1, 30]]);
+    }, _callee3, this, [[1, 27]]);
   }));
 
   return function (_x7, _x8, _x9) {
@@ -448,7 +428,7 @@ router.post('/action/moveThread', function () {
 
 router.post('/action/setThreadFixed', function () {
   var _ref7 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(req, res, next) {
-    var _ref8, fields, boardName, threadNumber, fixed, password, geolocationInfo;
+    var _ref8, fields, boardName, threadNumber, fixed, password;
 
     return regeneratorRuntime.wrap(function _callee4$(_context4) {
       while (1) {
@@ -490,41 +470,33 @@ router.post('/action/setThreadFixed', function () {
 
           case 13:
             _context4.next = 15;
-            return (0, _geolocation2.default)(req.ip);
+            return UsersModel.checkUserBan(req.ip, boardName, { write: true });
 
           case 15:
-            geolocationInfo = _context4.sent;
-            _context4.next = 18;
-            return UsersModel.checkUserBan(req.ip, boardName, {
-              write: true,
-              geolocationInfo: geolocationInfo
-            });
-
-          case 18:
-            _context4.next = 20;
+            _context4.next = 17;
             return UsersModel.checkUserPermissions(req, boardName, threadNumber, 'setThreadFixed', Tools.sha1(password));
 
-          case 20:
-            _context4.next = 22;
+          case 17:
+            _context4.next = 19;
             return ThreadsModel.setThreadFixed(boardName, threadNumber, 'true' === fixed);
 
-          case 22:
+          case 19:
             res.json({});
-            _context4.next = 28;
+            _context4.next = 25;
             break;
 
-          case 25:
-            _context4.prev = 25;
+          case 22:
+            _context4.prev = 22;
             _context4.t0 = _context4['catch'](0);
 
             next(_context4.t0);
 
-          case 28:
+          case 25:
           case 'end':
             return _context4.stop();
         }
       }
-    }, _callee4, this, [[0, 25]]);
+    }, _callee4, this, [[0, 22]]);
   }));
 
   return function (_x10, _x11, _x12) {
@@ -534,7 +506,7 @@ router.post('/action/setThreadFixed', function () {
 
 router.post('/action/setThreadClosed', function () {
   var _ref9 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(req, res, next) {
-    var _ref10, fields, boardName, threadNumber, closed, password, geolocationInfo;
+    var _ref10, fields, boardName, threadNumber, closed, password;
 
     return regeneratorRuntime.wrap(function _callee5$(_context5) {
       while (1) {
@@ -576,41 +548,33 @@ router.post('/action/setThreadClosed', function () {
 
           case 13:
             _context5.next = 15;
-            return (0, _geolocation2.default)(req.ip);
+            return UsersModel.checkUserBan(req.ip, boardName, { write: true });
 
           case 15:
-            geolocationInfo = _context5.sent;
-            _context5.next = 18;
-            return UsersModel.checkUserBan(req.ip, boardName, {
-              write: true,
-              geolocationInfo: geolocationInfo
-            });
-
-          case 18:
-            _context5.next = 20;
+            _context5.next = 17;
             return UsersModel.checkUserPermissions(req, boardName, threadNumber, 'setThreadClosed', Tools.sha1(password));
 
-          case 20:
-            _context5.next = 22;
+          case 17:
+            _context5.next = 19;
             return ThreadsModel.setThreadClosed(boardName, threadNumber, 'true' === closed);
 
-          case 22:
+          case 19:
             res.json({});
-            _context5.next = 28;
+            _context5.next = 25;
             break;
 
-          case 25:
-            _context5.prev = 25;
+          case 22:
+            _context5.prev = 22;
             _context5.t0 = _context5['catch'](0);
 
             next(_context5.t0);
 
-          case 28:
+          case 25:
           case 'end':
             return _context5.stop();
         }
       }
-    }, _callee5, this, [[0, 25]]);
+    }, _callee5, this, [[0, 22]]);
   }));
 
   return function (_x13, _x14, _x15) {
@@ -620,7 +584,7 @@ router.post('/action/setThreadClosed', function () {
 
 router.post('/action/setThreadUnbumpable', function () {
   var _ref11 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(req, res, next) {
-    var _ref12, fields, boardName, threadNumber, unbumpable, password, geolocationInfo;
+    var _ref12, fields, boardName, threadNumber, unbumpable, password;
 
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
@@ -662,41 +626,33 @@ router.post('/action/setThreadUnbumpable', function () {
 
           case 13:
             _context6.next = 15;
-            return (0, _geolocation2.default)(req.ip);
+            return UsersModel.checkUserBan(req.ip, boardName, { write: true });
 
           case 15:
-            geolocationInfo = _context6.sent;
-            _context6.next = 18;
-            return UsersModel.checkUserBan(req.ip, boardName, {
-              write: true,
-              geolocationInfo: geolocationInfo
-            });
-
-          case 18:
-            _context6.next = 20;
+            _context6.next = 17;
             return UsersModel.checkUserPermissions(req, boardName, threadNumber, 'setThreadUnbumpable', Tools.sha1(password));
 
-          case 20:
-            _context6.next = 22;
+          case 17:
+            _context6.next = 19;
             return ThreadsModel.setThreadUnbumpable(boardName, threadNumber, 'true' === unbumpable);
 
-          case 22:
+          case 19:
             res.json({});
-            _context6.next = 28;
+            _context6.next = 25;
             break;
 
-          case 25:
-            _context6.prev = 25;
+          case 22:
+            _context6.prev = 22;
             _context6.t0 = _context6['catch'](0);
 
             next(_context6.t0);
 
-          case 28:
+          case 25:
           case 'end':
             return _context6.stop();
         }
       }
-    }, _callee6, this, [[0, 25]]);
+    }, _callee6, this, [[0, 22]]);
   }));
 
   return function (_x16, _x17, _x18) {

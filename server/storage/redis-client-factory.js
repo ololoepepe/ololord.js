@@ -28,10 +28,6 @@ var _underscore = require('underscore');
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _fs = require('fs');
-
-var _fs2 = _interopRequireDefault(_fs);
-
 var _ioredis = require('ioredis');
 
 var _ioredis2 = _interopRequireDefault(_ioredis);
@@ -44,27 +40,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var defaultClient = null;
 var clients = new Map();
-var scripts = new Map();
-
-function loadScripts(path) {
-  _fs2.default.readdirSync(path).forEach(function (entry) {
-    var entryPath = path + '/' + entry;
-    var stat = _fs2.default.statSync(entryPath);
-    if (stat.isFile()) {
-      var match = entry.match(/^(.+?)\.((\d+)\.)?lua$/);
-      if (match) {
-        scripts.set(match[1], {
-          numberOfKeys: match[3] || 0,
-          lua: _fs2.default.readFileSync(entryPath, 'utf8')
-        });
-      }
-    } else if (stat.isDirectory()) {
-      loadScripts(entryPath);
-    }
-  });
-}
-
-loadScripts(__dirname + '/../../misc/lua');
 
 function createOptions() {
   return {
@@ -95,9 +70,6 @@ function createClient() {
   } else {
     client = new _ioredis2.default(createOptions());
   }
-  scripts.forEach(function (script, name) {
-    client.defineCommand(name, script);
-  });
   return client;
 }
 //# sourceMappingURL=redis-client-factory.js.map

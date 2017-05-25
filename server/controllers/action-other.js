@@ -16,10 +16,6 @@ var _files = require('../core/files');
 
 var Files = _interopRequireWildcard(_files);
 
-var _geolocation = require('../core/geolocation');
-
-var _geolocation2 = _interopRequireDefault(_geolocation);
-
 var _config = require('../helpers/config');
 
 var _config2 = _interopRequireDefault(_config);
@@ -99,18 +95,10 @@ router.post('/action/sendChatMessage', function () {
 
           case 16:
             _context.next = 18;
-            return (0, _geolocation2.default)(req.ip);
+            return UsersModel.checkUserBan(req.ip, _boardName, { write: true });
 
           case 18:
-            req.geolocationInfo = _context.sent;
-            _context.next = 21;
-            return UsersModel.checkUserBan(req.ip, _boardName, {
-              write: true,
-              geolocationInfo: req.geolocationInfo
-            });
-
-          case 21:
-            _context.next = 23;
+            _context.next = 20;
             return ChatsModel.addChatMessage({
               user: req,
               boardName: _boardName,
@@ -119,7 +107,7 @@ router.post('/action/sendChatMessage', function () {
               text: text
             });
 
-          case 23:
+          case 20:
             result = _context.sent;
             message = result.message, receiver = result.receiver;
 
@@ -138,21 +126,21 @@ router.post('/action/sendChatMessage', function () {
               hashpasses: receiver.hashpass
             });
             res.json({});
-            _context.next = 34;
+            _context.next = 31;
             break;
 
-          case 31:
-            _context.prev = 31;
+          case 28:
+            _context.prev = 28;
             _context.t0 = _context['catch'](0);
 
             next(_context.t0);
 
-          case 34:
+          case 31:
           case 'end':
             return _context.stop();
         }
       }
-    }, _callee, this, [[0, 31]]);
+    }, _callee, this, [[0, 28]]);
   }));
 
   return function (_x, _x2, _x3) {
@@ -210,18 +198,10 @@ router.post('/action/deleteChatMessages', function () {
 
           case 16:
             _context2.next = 18;
-            return (0, _geolocation2.default)(req.ip);
+            return UsersModel.checkUserBan(req.ip, _boardName2, { write: true });
 
           case 18:
-            req.geolocationInfo = _context2.sent;
-            _context2.next = 21;
-            return UsersModel.checkUserBan(req.ip, _boardName2, {
-              write: true,
-              geolocationInfo: req.geolocationInfo
-            });
-
-          case 21:
-            _context2.next = 23;
+            _context2.next = 20;
             return ChatsModel.deleteChatMessages({
               user: req,
               boardName: _boardName2,
@@ -229,23 +209,23 @@ router.post('/action/deleteChatMessages', function () {
               chatNumber: chatNumber
             });
 
-          case 23:
+          case 20:
             res.json({});
-            _context2.next = 29;
+            _context2.next = 26;
             break;
 
-          case 26:
-            _context2.prev = 26;
+          case 23:
+            _context2.prev = 23;
             _context2.t0 = _context2['catch'](0);
 
             next(_context2.t0);
 
-          case 29:
+          case 26:
           case 'end':
             return _context2.stop();
         }
       }
-    }, _callee2, this, [[0, 26]]);
+    }, _callee2, this, [[0, 23]]);
   }));
 
   return function (_x4, _x5, _x6) {
@@ -280,49 +260,41 @@ router.post('/action/synchronize', function () {
 
           case 9:
             _context3.next = 11;
-            return (0, _geolocation2.default)(req.ip);
+            return UsersModel.checkUserBan(req.ip, boardName, { write: true });
 
           case 11:
-            req.geolocationInfo = _context3.sent;
-            _context3.next = 14;
-            return UsersModel.checkUserBan(req.ip, boardName, {
-              write: true,
-              geolocationInfo: req.geolocationInfo
-            });
-
-          case 14:
-            _context3.prev = 14;
+            _context3.prev = 11;
 
             data = JSON.parse(data);
-            _context3.next = 21;
+            _context3.next = 18;
             break;
 
-          case 18:
-            _context3.prev = 18;
-            _context3.t0 = _context3['catch'](14);
+          case 15:
+            _context3.prev = 15;
+            _context3.t0 = _context3['catch'](11);
             throw new Error(Tools.translate('Failed to parse data'));
 
-          case 21:
-            _context3.next = 23;
+          case 18:
+            _context3.next = 20;
             return UsersModel.setSynchronizationData(key, data);
 
-          case 23:
+          case 20:
             res.json({});
-            _context3.next = 29;
+            _context3.next = 26;
             break;
 
-          case 26:
-            _context3.prev = 26;
+          case 23:
+            _context3.prev = 23;
             _context3.t1 = _context3['catch'](0);
 
             next(_context3.t1);
 
-          case 29:
+          case 26:
           case 'end':
             return _context3.stop();
         }
       }
-    }, _callee3, this, [[0, 26], [14, 18]]);
+    }, _callee3, this, [[0, 23], [11, 15]]);
   }));
 
   return function (_x7, _x8, _x9) {
@@ -381,17 +353,9 @@ router.post('/action/search', function () {
                 return p >= 0;
               } });
             _context4.next = 18;
-            return (0, _geolocation2.default)(req.ip);
+            return UsersModel.checkUserBan(req.ip, _boardName3, { write: true });
 
           case 18:
-            req.geolocationInfo = _context4.sent;
-            _context4.next = 21;
-            return UsersModel.checkUserBan(req.ip, _boardName3, {
-              write: true,
-              geolocationInfo: req.geolocationInfo
-            });
-
-          case 21:
             phrases = query.match(/\w+|"[^"]+"/g) || [];
             model = {
               searchQuery: query,
@@ -400,10 +364,10 @@ router.post('/action/search', function () {
               }),
               searchBoard: _boardName3
             };
-            _context4.next = 25;
+            _context4.next = 22;
             return PostsModel.findPosts(query, _boardName3, page);
 
-          case 25:
+          case 22:
             result = _context4.sent;
             maxSubjectLength = (0, _config2.default)('system.search.maxResultPostSubjectLengh');
             maxTextLength = (0, _config2.default)('system.search.maxResultPostTextLengh');
@@ -429,21 +393,21 @@ router.post('/action/search', function () {
             model.total = result.total;
             model.max = result.max;
             res.json(model);
-            _context4.next = 37;
+            _context4.next = 34;
             break;
 
-          case 34:
-            _context4.prev = 34;
+          case 31:
+            _context4.prev = 31;
             _context4.t0 = _context4['catch'](0);
 
             next(_context4.t0);
 
-          case 37:
+          case 34:
           case 'end':
             return _context4.stop();
         }
       }
-    }, _callee4, this, [[0, 34]]);
+    }, _callee4, this, [[0, 31]]);
   }));
 
   return function (_x10, _x11, _x12) {

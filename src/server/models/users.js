@@ -1,9 +1,7 @@
 import _ from 'underscore';
-import FS from 'q-io/fs';
 
 import Board from '../boards/board';
 import config from '../helpers/config';
-import FSWatcher from '../helpers/fs-watcher';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
 import * as Permissions from '../helpers/permissions';
@@ -25,45 +23,6 @@ let UserCaptchaQuotas = new Hash(redisClient(), 'captchaQuotas', {
   parse: quota => +quota,
   stringify: quota => quota.toString()
 });
-
-function transformIPBans(bans) {
-  return _(bans).reduce((acc, ban, ip) => {
-    ip = Tools.correctAddress(ip);
-    if (ip) {
-      acc[ip] = ban;
-    }
-    return acc;
-  }, {});
-}
-
-let ipBans = FSWatcher.createWatchedResource(`${__dirname}/../../misc/user-bans.json`, (path) => {
-  return transformIPBans(require(path));
-}, async function(path) {
-  let data = await FS.read(path);
-  ipBans = transformIPBans(JSON.parse(data));
-}) || {};
-
-function transformGeoBans(bans) {
-  return _(bans).reduce((acc, value, key) => {
-    if (typeof value === 'string') {
-      value = [value];
-    }
-    if (_(value).isArray()) {
-      value = new Set(value.map(ip => Tools.correctAddress(ip)).filter(ip => !!ip));
-    } else {
-      value = !!value;
-    }
-    acc.set(key.toUpperCase(), value);
-    return acc;
-  }, new Map());
-}
-
-let geoBans = FSWatcher.createWatchedResource(`${__dirname}/../../misc/geo-bans.json`, (path) => {
-  return transformGeoBans(require(path));
-}, async function(path) {
-  let data = await FS.read(path);
-  geoBans = transformGeoBans(JSON.parse(data));
-}) || new Map();
 
 export async function getUserCaptchaQuota(boardName, userID) {
   if (!Board.board(boardName)) {
@@ -366,45 +325,14 @@ export async function setSynchronizationData(key, data) {
   }, { upsert: true });
 }
 
-function checkGeoBan(geolocationInfo, ip) {
-  let def = geoBans.get('*');
-  if (def) {
-    geolocationInfo = geolocationInfo || {};
-  } else if (!geolocationInfo || !geolocationInfo.countryCode) {
-    return;
-  }
-  let countryCode = geolocationInfo.countryCode;
-  if (typeof countryCode !== 'string') {
-    countryCode = '';
-  }
-  let user = geoBans.get(countryCode.toUpperCase());
-  if (ip && ((typeof user === 'object' && user.has(ip)) || (typeof def === 'object' && def.has(ip)))) {
-    return;
-  }
-  if (typeof user === 'boolean' && !user) {
-    return;
-  }
-  if (!user && !def) {
-    return;
-  }
-  throw new Error(Tools.translate('Posting is disabled for this country'));
-}
-
-export async function checkUserBan(ip, boardNames, { write, geolocationInfo } = {}) {
+export async function checkUserBan(ip, boardNames, { write } = {}) {
   ip = Tools.correctAddress(ip);
-  let ban = ipBans[ip];
-  if (ban && (write || 'NO_ACCESS' === ban.level)) {
-    throw { ban: ban };
-  }
   if (boardNames) {
     let bannedUser = await getBannedUser(ip, boardNames);
-    ban = _(bannedUser.bans).find((ban) => { return ban && (write || 'NO_ACCESS' === ban.level); });
+    let ban = _(bannedUser.bans).find((ban) => { return ban && (write || 'NO_ACCESS' === ban.level); });
     if (ban) {
       throw { ban: ban };
     }
-  }
-  if (geolocationInfo) {
-    return checkGeoBan(geolocationInfo, ip);
   }
 }
 

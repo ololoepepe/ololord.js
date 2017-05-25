@@ -4,7 +4,6 @@ import express from 'express';
 import Board from '../boards/board';
 import Captcha from '../captchas/captcha';
 import * as Files from '../core/files';
-import geolocation from '../core/geolocation';
 import config from '../helpers/config';
 import * as IPC from '../helpers/ipc';
 import PostCreationTransaction from '../helpers/post-creation-transaction';
@@ -56,11 +55,7 @@ router.post('/action/markupText', async function(req, res, next) {
     if (!board) {
       throw new Error(Tools.translate('Invalid board'));
     }
-    req.geolocationInfo = await geolocation(req.ip);
-    await UsersModel.checkUserBan(req.ip, boardName, {
-      write: true,
-      geolocationInfo: req.geolocationInfo
-    });
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
     let rawText = text || '';
     await testParameters(req, boardName, 'markupText', { fields: fields });
     markupMode = markupMode || '';
@@ -100,11 +95,7 @@ router.post('/action/createPost', async function(req, res, next) {
     if (!threadNumber) {
       throw new Error(Tools.translate('Invalid thread'));
     }
-    req.geolocationInfo = await geolocation(req.ip);
-    await UsersModel.checkUserBan(req.ip, boardName, {
-      write: true,
-      geolocationInfo: req.geolocationInfo
-    });
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
     await Captcha.checkCaptcha(req, fields);
     files = await Files.getFiles(fields, files);
     await testParameters(req, boardName, 'createPost', {
@@ -151,11 +142,7 @@ router.post('/action/createThread', async function(req, res, next) {
     if (!Board.board(boardName)) {
       throw new Error(Tools.translate('Invalid board'));
     }
-    req.geolocationInfo = await geolocation(req.ip);
-    await UsersModel.checkUserBan(req.ip, boardName, {
-      write: true,
-      geolocationInfo: req.geolocationInfo
-    });
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
     await Captcha.checkCaptcha(req, fields);
     files = await Files.getFiles(fields, files);
     await testParameters(req, boardName, 'createThread', {
@@ -165,7 +152,7 @@ router.post('/action/createThread', async function(req, res, next) {
     transaction = new PostCreationTransaction(boardName);
     let thread = await ThreadsModel.createThread(req, fields, transaction);
     files = await Files.processFiles(boardName, files, transaction);
-    let post = await PostsModel.createPost(req, fields, files, transaction, {
+    await PostsModel.createPost(req, fields, files, transaction, {
       postNumber: thread.number,
       date: new Date(thread.createdAt)
     });
@@ -193,11 +180,7 @@ router.post('/action/editPost', async function(req, res, next) {
     if (!postNumber) {
       throw new Error(Tools.translate('Invalid post number'));
     }
-    req.geolocationInfo = await geolocation(req.ip);
-    await UsersModel.checkUserBan(req.ip, boardName, {
-      write: true,
-      geolocationInfo: req.geolocationInfo
-    });
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
     await UsersModel.checkUserPermissions(req, boardName, postNumber, 'editPost');
     await testParameters(req, boardName, 'editPost', {
       fields: fields,
@@ -225,11 +208,7 @@ router.post('/action/addFiles', async function(req, res, next) {
     if (!postNumber) {
       throw new Error(Tools.translate('Invalid post number'));
     }
-    req.geolocationInfo = await geolocation(req.ip);
-    await UsersModel.checkUserBan(req.ip, boardName, {
-      write: true,
-      geolocationInfo: req.geolocationInfo
-    });
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
     await UsersModel.checkUserPermissions(req, boardName, postNumber, 'addFilesToPost');
     let post = await PostsModel.getPost(boardName, postNumber);
     if (!post) {
@@ -267,11 +246,7 @@ router.post('/action/deletePost', async function(req, res, next) {
     if (!postNumber) {
       throw new Error(Tools.translate('Invalid post number'));
     }
-    req.geolocationInfo = await geolocation(req.ip);
-    await UsersModel.checkUserBan(req.ip, boardName, {
-      write: true,
-      geolocationInfo: req.geolocationInfo
-    });
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
     await UsersModel.checkUserPermissions(req, boardName, postNumber, 'deletePost', Tools.sha1(password));
     let isThread = await ThreadsModel.threadExists(boardName, postNumber);
     if (isThread) {
@@ -297,11 +272,7 @@ router.post('/action/deleteFile', async function(req, res, next) {
       throw new Error(Tools.translate('No such file'));
     }
     let { boardName, postNumber } = fileInfo;
-    req.geolocationInfo = await geolocation(req.ip);
-    await UsersModel.checkUserBan(req.ip, boardName, {
-      write: true,
-      geolocationInfo: req.geolocationInfo
-    });
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
     await UsersModel.checkUserPermissions(req, boardName, postNumber, 'deleteFile', Tools.sha1(password));
     let post = await testParameters(req, boardName, 'deleteFile', { postNumber: postNumber });
     await FilesModel.deleteFile(fileName);
@@ -323,11 +294,7 @@ router.post('/action/editFileRating', async function(req, res, next) {
       throw new Error(Tools.translate('No such file'));
     }
     let { boardName, postNumber } = fileInfo;
-    req.geolocationInfo = await geolocation(req.ip);
-    await UsersModel.checkUserBan(req.ip, boardName, {
-      write: true,
-      geolocationInfo: req.geolocationInfo
-    });
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
     await UsersModel.checkUserPermissions(req, boardName, postNumber, 'editFileRating', Tools.sha1(password));
     await FilesModel.editFileRating(fileName, rating);
     res.json({});
@@ -351,11 +318,7 @@ router.post('/action/editAudioTags', async function(req, res, next) {
       throw new Error(Tools.translate('Not an audio file'));
     }
     let { boardName, postNumber } = fileInfo;
-    req.geolocationInfo = await geolocation(req.ip);
-    await UsersModel.checkUserBan(req.ip, boardName, {
-      write: true,
-      geolocationInfo: req.geolocationInfo
-    });
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
     await UsersModel.checkUserPermissions(req, boardName, postNumber, 'editAudioTags', Tools.sha1(password));
     await FilesModel.editAudioTags(fileName, fields);
     res.json({});

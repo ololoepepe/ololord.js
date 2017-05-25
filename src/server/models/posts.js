@@ -5,6 +5,7 @@ import * as FilesModel from './files';
 import * as PostReferencesModel from './post-references';
 import Board from '../boards/board';
 import * as Renderer from '../core/renderer';
+import geolocation from '../core/geolocation';
 import config from '../helpers/config';
 import * as IPC from '../helpers/ipc';
 import Logger from '../helpers/logger';
@@ -139,6 +140,7 @@ export async function createPost(req, fields, files, transaction, { postNumber, 
     postNumber = await BoardsModel.nextPostNumber(boardName);
   }
   let fileInfos = FilesModel.createFileInfos(files, boardName, postNumber);
+  const geolocationInfo = await geolocation(req.ip);
   let post = {
     boardName: boardName,
     number: postNumber,
@@ -153,7 +155,7 @@ export async function createPost(req, fields, files, transaction, { postNumber, 
     markup: markupModes,
     options: createPostOptions(req, sage, tripcode, signAsOp),
     user: createPostUser(req, accessLevel, password),
-    geolocation: req.geolocationInfo,
+    geolocation: geolocationInfo,
     fileInfos: fileInfos,
     fileInfoCount: fileInfos.length,
     extraData: extraData,

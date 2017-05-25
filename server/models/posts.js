@@ -186,7 +186,7 @@ var createPost = exports.createPost = function () {
         unbumpable = _ref8.unbumpable,
         archived = _ref8.archived;
 
-    var boardName, threadNumber, text, markupMode, name, subject, sage, signAsOp, tripcode, password, board, Post, postCount, rawText, markupModes, referencedPosts, accessLevel, extraData, fileInfos, post, postCountNew;
+    var boardName, threadNumber, text, markupMode, name, subject, sage, signAsOp, tripcode, password, board, Post, postCount, rawText, markupModes, referencedPosts, accessLevel, extraData, fileInfos, geolocationInfo, post, postCountNew;
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
@@ -255,6 +255,11 @@ var createPost = exports.createPost = function () {
 
           case 30:
             fileInfos = FilesModel.createFileInfos(files, boardName, postNumber);
+            _context6.next = 33;
+            return (0, _geolocation2.default)(req.ip);
+
+          case 33:
+            geolocationInfo = _context6.sent;
             post = {
               boardName: boardName,
               number: postNumber,
@@ -269,7 +274,7 @@ var createPost = exports.createPost = function () {
               markup: markupModes,
               options: createPostOptions(req, sage, tripcode, signAsOp),
               user: createPostUser(req, accessLevel, password),
-              geolocation: req.geolocationInfo,
+              geolocation: geolocationInfo,
               fileInfos: fileInfos,
               fileInfoCount: fileInfos.length,
               extraData: extraData,
@@ -280,42 +285,42 @@ var createPost = exports.createPost = function () {
             };
 
             transaction.addPostNumber(postNumber);
-            _context6.next = 35;
+            _context6.next = 38;
             return Post.insertOne(post);
 
-          case 35:
-            _context6.next = 37;
+          case 38:
+            _context6.next = 40;
             return getPostCount(boardName, threadNumber, postNumber);
 
-          case 37:
+          case 40:
             postCountNew = _context6.sent;
 
             if (!(postCountNew !== postCount)) {
-              _context6.next = 41;
-              break;
-            }
-
-            _context6.next = 41;
-            return adjustPostSequenceNumber(boardName, postNumber, postCount, postCountNew);
-
-          case 41:
-            if (!(!sage && postCount < board.bumpLimit && !unbumpable)) {
               _context6.next = 44;
               break;
             }
 
             _context6.next = 44;
-            return setThreadUpdateTime(boardName, threadNumber, date);
+            return adjustPostSequenceNumber(boardName, postNumber, postCount, postCountNew);
 
           case 44:
-            _context6.next = 46;
+            if (!(!sage && postCount < board.bumpLimit && !unbumpable)) {
+              _context6.next = 47;
+              break;
+            }
+
+            _context6.next = 47;
+            return setThreadUpdateTime(boardName, threadNumber, date);
+
+          case 47:
+            _context6.next = 49;
             return PostReferencesModel.addReferringPosts(referencedPosts, boardName, postNumber, threadNumber);
 
-          case 46:
-            _context6.next = 48;
+          case 49:
+            _context6.next = 51;
             return IPC.render(boardName, threadNumber, postNumber, 'create');
 
-          case 48:
+          case 51:
             _asyncToGenerator(regeneratorRuntime.mark(function _callee5() {
               return regeneratorRuntime.wrap(function _callee5$(_context5) {
                 while (1) {
@@ -333,7 +338,7 @@ var createPost = exports.createPost = function () {
             }))();
             return _context6.abrupt('return', post);
 
-          case 50:
+          case 53:
           case 'end':
             return _context6.stop();
         }
@@ -1056,6 +1061,10 @@ var _board2 = _interopRequireDefault(_board);
 var _renderer = require('../core/renderer');
 
 var Renderer = _interopRequireWildcard(_renderer);
+
+var _geolocation = require('../core/geolocation');
+
+var _geolocation2 = _interopRequireDefault(_geolocation);
 
 var _config = require('../helpers/config');
 

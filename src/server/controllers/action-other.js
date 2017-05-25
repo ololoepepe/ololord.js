@@ -3,7 +3,6 @@ import express from 'express';
 import Board from '../boards/board';
 import Captcha from '../captchas/captcha';
 import * as Files from '../core/files';
-import geolocation from '../core/geolocation';
 import config from '../helpers/config';
 import * as Tools from '../helpers/tools';
 import * as ChatsModel from '../models/chats';
@@ -26,11 +25,7 @@ router.post('/action/sendChatMessage', async function(req, res, next) {
     if (!text || typeof text !== 'string') {
       throw new Error(Tools.translate('Message is empty'));
     }
-    req.geolocationInfo = await geolocation(req.ip);
-    await UsersModel.checkUserBan(req.ip, boardName, {
-      write: true,
-      geolocationInfo: req.geolocationInfo
-    });
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
     let result = await ChatsModel.addChatMessage({
       user: req,
       boardName: boardName,
@@ -72,11 +67,7 @@ router.post('/action/deleteChatMessages', async function(req, res, next) {
     if (!chatNumber) {
       throw new Error(Tools.translate('Invalid chat number'));
     }
-    req.geolocationInfo = await geolocation(req.ip);
-    await UsersModel.checkUserBan(req.ip, boardName, {
-      write: true,
-      geolocationInfo: req.geolocationInfo
-    });
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
     await ChatsModel.deleteChatMessages({
       user: req,
       boardName: boardName,
@@ -95,11 +86,7 @@ router.post('/action/synchronize', async function(req, res, next) {
     if (!key || typeof key !== 'string') {
       throw new Error(Tools.translate('No key specified'));
     }
-    req.geolocationInfo = await geolocation(req.ip);
-    await UsersModel.checkUserBan(req.ip, boardName, {
-      write: true,
-      geolocationInfo: req.geolocationInfo
-    });
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
     try {
       data = JSON.parse(data);
     } catch (err) {
@@ -128,11 +115,7 @@ router.post('/action/search', async function(req, res, next) {
       throw new Error(Tools.translate('Invalid board'));
     }
     page = Tools.option(page, 'number', 0, { test: (p) => { return p >= 0; } });
-    req.geolocationInfo = await geolocation(req.ip);
-    await UsersModel.checkUserBan(req.ip, boardName, {
-      write: true,
-      geolocationInfo: req.geolocationInfo
-    });
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
     let phrases = query.match(/\w+|"[^"]+"/g) || [];
     let model = {
       searchQuery: query,

@@ -5,7 +5,6 @@ import moment from 'moment';
 import Board from '../boards/board';
 import config from '../helpers/config';
 import * as Files from '../core/files';
-import geolocation from '../core/geolocation';
 import PostCreationTransaction from '../helpers/post-creation-transaction';
 import * as Tools from '../helpers/tools';
 import * as ThreadsModel from '../models/threads';
@@ -149,11 +148,7 @@ router.post('/action/delall', async function(req, res, next) {
         throw new Error(Tools.translate('Not enough rights'));
       }
     });
-    let geolocationInfo = await geolocation(req.ip);
-    await UsersModel.checkUserBan(req.ip, boardNames, {
-      write: true,
-      geolocationInfo: geolocationInfo
-    });
+    await UsersModel.checkUserBan(req.ip, boardNames, { write: true });
     await BoardsModel.delall(req, userIp, boardNames);
     res.json({});
   } catch (err) {
@@ -179,11 +174,7 @@ router.post('/action/moveThread', async function(req, res, next) {
     if (!req.isModer(boardName) || !req.isModer(targetBoardName)) {
       throw new Error(Tools.translate('Not enough rights'));
     }
-    let geolocationInfo = await geolocation(req.ip);
-    await UsersModel.checkUserBan(req.ip, [boardName, targetBoardName], {
-      write: true,
-      geolocationInfo: geolocationInfo
-    });
+    await UsersModel.checkUserBan(req.ip, [boardName, targetBoardName], { write: true });
     await UsersModel.checkUserPermissions(req, boardName, threadNumber, 'moveThread', Tools.sha1(password));
     transaction = new PostCreationTransaction(boardName);
     let result = await ThreadsModel.moveThread(boardName, threadNumber, targetBoardName, transaction);
@@ -210,11 +201,7 @@ router.post('/action/setThreadFixed', async function(req, res, next) {
     if (!req.isModer(boardName)) {
       throw new Error(Tools.translate('Not enough rights'));
     }
-    let geolocationInfo = await geolocation(req.ip);
-    await UsersModel.checkUserBan(req.ip, boardName, {
-      write: true,
-      geolocationInfo: geolocationInfo
-    });
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
     await UsersModel.checkUserPermissions(req, boardName, threadNumber, 'setThreadFixed', Tools.sha1(password));
     await ThreadsModel.setThreadFixed(boardName, threadNumber, 'true' === fixed);
     res.json({});
@@ -237,11 +224,7 @@ router.post('/action/setThreadClosed', async function(req, res, next) {
     if (!req.isModer(boardName)) {
       throw new Error(Tools.translate('Not enough rights'));
     }
-    let geolocationInfo = await geolocation(req.ip);
-    await UsersModel.checkUserBan(req.ip, boardName, {
-      write: true,
-      geolocationInfo: geolocationInfo
-    });
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
     await UsersModel.checkUserPermissions(req, boardName, threadNumber, 'setThreadClosed', Tools.sha1(password));
     await ThreadsModel.setThreadClosed(boardName, threadNumber, 'true' === closed);
     res.json({});
@@ -264,11 +247,7 @@ router.post('/action/setThreadUnbumpable', async function(req, res, next) {
     if (!req.isModer(boardName)) {
       throw new Error(Tools.translate('Not enough rights'));
     }
-    let geolocationInfo = await geolocation(req.ip);
-    await UsersModel.checkUserBan(req.ip, boardName, {
-      write: true,
-      geolocationInfo: geolocationInfo
-    });
+    await UsersModel.checkUserBan(req.ip, boardName, { write: true });
     await UsersModel.checkUserPermissions(req, boardName, threadNumber, 'setThreadUnbumpable', Tools.sha1(password));
     await ThreadsModel.setThreadUnbumpable(boardName, threadNumber, 'true' === unbumpable);
     res.json({});
