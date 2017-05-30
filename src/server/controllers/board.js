@@ -79,6 +79,9 @@ async function renderThreadHTML(thread, { prerendered } = {}) {
 
 async function renderThread(boardName, threadNumber) {
   let thread = await BoardsModel.getThread(boardName, threadNumber);
+  delete thread.user.ip;
+  delete thread.user.hashpass;
+  delete thread.user.password;
   await Renderer.renderThread(thread);
   await Cache.writeFile(`${boardName}/res/${threadNumber}.json`, JSON.stringify({ thread: thread }));
   await renderThreadHTML(thread);
