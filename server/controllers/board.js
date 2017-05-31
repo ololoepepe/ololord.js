@@ -61,18 +61,22 @@ var renderThread = function () {
 
           case 2:
             thread = _context2.sent;
-            _context2.next = 5;
+
+            delete thread.user.ip;
+            delete thread.user.hashpass;
+            delete thread.user.password;
+            _context2.next = 8;
             return Renderer.renderThread(thread);
 
-          case 5:
-            _context2.next = 7;
+          case 8:
+            _context2.next = 10;
             return Cache.writeFile(boardName + '/res/' + threadNumber + '.json', JSON.stringify({ thread: thread }));
 
-          case 7:
-            _context2.next = 9;
+          case 10:
+            _context2.next = 12;
             return renderThreadHTML(thread);
 
-          case 9:
+          case 12:
           case 'end':
             return _context2.stop();
         }
