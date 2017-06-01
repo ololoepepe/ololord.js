@@ -107,6 +107,9 @@ async function renderPage(boardName, pageNumber, { allowPrerender } = {}) {
   }
   let page = await BoardsModel.getPage(boardName, pageNumber);
   await Tools.series(page.threads, async function(thread) {
+    delete thread.user.ip;
+    delete thread.user.hashpass;
+    delete thread.user.password;
     return await Renderer.renderThread(thread);
   });
   let pageID = (pageNumber > 0) ? pageNumber : 'index';

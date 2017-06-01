@@ -121,13 +121,16 @@ var renderPage = function () {
                   while (1) {
                     switch (_context3.prev = _context3.next) {
                       case 0:
-                        _context3.next = 2;
+                        delete thread.user.ip;
+                        delete thread.user.hashpass;
+                        delete thread.user.password;
+                        _context3.next = 5;
                         return Renderer.renderThread(thread);
 
-                      case 2:
+                      case 5:
                         return _context3.abrupt('return', _context3.sent);
 
-                      case 3:
+                      case 6:
                       case 'end':
                         return _context3.stop();
                     }
